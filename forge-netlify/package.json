@@ -1,0 +1,14 @@
+{
+  "name": "forge-fitness-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FORGE fitness platform — Netlify and Supabase",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "node --check --input-type=module < public/app.js && node --check netlify/functions/ai-coaching.mjs && node --check netlify/functions/config.mjs",
+    "test": "npm run build"
+  },
+  "devDependencies": {
+    "netlify-cli": "^23.0.0"
+  }
+}
