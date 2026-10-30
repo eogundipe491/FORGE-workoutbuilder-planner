@@ -1,0 +1,31 @@
+{
+  "name": "forge-fitness-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FORGE fitness platform \u2014 Netlify and Supabase",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "esbuild public/app.js --bundle --format=esm --target=es2020 --outfile=public/app.bundle.js && node --check public/app.bundle.js && node --check netlify/functions/ai-coaching.mjs && node --check netlify/functions/config.mjs",
+    "test": "npm run build && node --test",
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios",
+    "assets:generate": "capacitor-assets generate"
+  },
+  "devDependencies": {
+    "netlify-cli": "^23.0.0",
+    "@capacitor/cli": "^7.4.3",
+    "esbuild": "^0.25.0",
+    "@capacitor/assets": "^3.0.5"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/ios": "^7.4.3",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@supabase/supabase-js": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

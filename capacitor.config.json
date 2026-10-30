@@ -1,0 +1,12 @@
+{
+  "appId": "com.forge.training",
+  "appName": "FORGE",
+  "webDir": "public",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#f5f2eb",
+      "showSpinner": false
+    }
+  }
+}

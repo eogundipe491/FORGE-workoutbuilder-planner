@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FORGE — Editorial Athletic Journal & AI Coaching Platform</title>
+    
+    <!-- Typography & Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS Engine -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        forge: {
+                            50: '#FAF8F5',
+                            100: '#F4EFE6',
+                            200: '#E6DCB8',
+                            300: '#D5C498',
+                            400: '#B89B5E',
+                            500: '#9C7A3C',
+                            600: '#7E5F2D',
+                            700: '#5C4421',
+                            800: '#3D2D16',
+                            900: '#221A0E',
+                            950: '#140F08',
+                            
+                            // Editorial Tones
+                            charcoal: '#1A1917',
+                            'charcoal-light': '#262421',
+                            cream: '#F7F4EE',
+                            sand: '#EBE5D8',
+                            rust: '#C85A32',
+                            'rust-dark': '#A34220',
+                            gold: '#C5A059',
+                            olive: '#4A5D4E',
+                            border: '#E2DACC',
+                            'dark-border': '#2E2B26'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                        cinzel: ['Cinzel', 'serif'],
+                        sans: ['Inter', '-apple-system', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Editorial Styling */
+        body { font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-cinzel { font-family: 'Cinzel', serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #D5C498; border-radius: 3px; }
+        .dark ::-webkit-scrollbar-thumb { background: #3D2D16; }
+
+        .telemetry-bg {
+            background: linear-gradient(135deg, rgba(197, 160, 89, 0.05) 0%, rgba(26, 25, 23, 0.02) 100%);
+        }
+        
+        .pulse-glow {
+            animation: glow 2s infinite ease-in-out;
+        }
+        @keyframes glow {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-forge-cream dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-cream min-h-full flex flex-col transition-colors duration-300">
+
+    <!-- TOP HEADER / BRANDING NAVIGATION -->
+    <header class="border-b border-forge-border dark:border-forge-dark-border bg-forge-cream/90 dark:bg-forge-charcoal/90 backdrop-blur-md sticky top-0 z-40 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4 py-3">
+            
+            <!-- Logo & Edition Tag -->
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                <div class="w-9 h-9 rounded-lg bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal flex items-center justify-center font-cinzel font-bold text-xl shadow-sm">
+                    F
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="font-cinzel font-bold text-2xl tracking-widest text-forge-charcoal dark:text-forge-cream">FORGE</span>
+                        <span class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-forge-gold/20 text-forge-700 dark:text-forge-gold border border-forge-gold/30 font-semibold">Production v1.0</span>
+                    </div>
+                    <p class="text-[11px] font-serif italic text-forge-600 dark:text-forge-400 -mt-1 hidden sm:block">Precision Athletic Journal & AI Telemetry Proxy</p>
+                </div>
+            </div>
+
+            <!-- Workspace Navigation Tabs -->
+            <nav class="hidden md:flex items-center space-x-1 border border-forge-border dark:border-forge-dark-border p-1 rounded-xl bg-forge-sand/50 dark:bg-forge-charcoal-light/50">
+                <button onclick="switchTab('landing')" id="tab-landing" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="globe" class="w-3.5 h-3.5 inline mr-1"></i>Landing
+                </button>
+                <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5 inline mr-1"></i>Dashboard
+                </button>
+                <button onclick="switchTab('blueprint')" id="tab-blueprint" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="compass" class="w-3.5 h-3.5 inline mr-1"></i>Blueprint
+                </button>
+                <button onclick="switchTab('questionnaire')" id="tab-questionnaire" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="clipboard-list" class="w-3.5 h-3.5 inline mr-1"></i>37Q Onboarding
+                </button>
+                <button onclick="switchTab('workout')" id="tab-workout" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all bg-forge-cream dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-gold shadow-sm border border-forge-border/50 dark:border-forge-dark-border">
+                    <i data-lucide="dumbbell" class="w-3.5 h-3.5 inline mr-1"></i>Logger
+                </button>
+                <button onclick="switchTab('exercises')" id="tab-exercises" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="book-open" class="w-3.5 h-3.5 inline mr-1"></i>Library
+                </button>
+                <button onclick="switchTab('programmes')" id="tab-programmes" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 inline mr-1"></i>Planner
+                </button>
+                <button onclick="switchTab('progress')" id="tab-progress" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="line-chart" class="w-3.5 h-3.5 inline mr-1"></i>Analytics
+                </button>
+                <button onclick="switchTab('nutrition')" id="tab-nutrition" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="scan-line" class="w-3.5 h-3.5 inline mr-1"></i>Nutrition
+                </button>
+                <button onclick="switchTab('trainer')" id="tab-trainer" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="users" class="w-3.5 h-3.5 inline mr-1"></i>Trainer
+                </button>
+                <button onclick="switchTab('telemetry')" id="tab-telemetry" class="px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream">
+                    <i data-lucide="terminal" class="w-3.5 h-3.5 inline mr-1"></i>Telemetry
+                </button>
+            </nav>
+
+            <!-- User Auth & Theme Status -->
+            <div class="flex items-center space-x-3">
+                <button onclick="toggleDarkMode()" class="p-2 rounded-lg border border-forge-border dark:border-forge-dark-border text-forge-700 dark:text-forge-300 hover:bg-forge-sand dark:hover:bg-forge-charcoal-light transition">
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block text-forge-gold"></i>
+                    <i data-lucide="moon" class="w-4 h-4 block dark:hidden text-forge-charcoal"></i>
+                </button>
+
+                <div id="user-badge" class="flex items-center space-x-2 border border-forge-border dark:border-forge-dark-border rounded-lg px-3 py-1.5 bg-forge-cream dark:bg-forge-charcoal-light cursor-pointer hover:border-forge-gold transition" onclick="openAuthModal()">
+                    <div class="w-6 h-6 rounded-full bg-forge-rust text-white flex items-center justify-center font-mono font-bold text-xs">
+                        AM
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <div class="text-xs font-bold font-sans leading-none text-forge-charcoal dark:text-forge-cream">Alex Mercer</div>
+                        <span class="text-[9px] font-mono text-forge-gold uppercase font-semibold">Athlete Pro</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Bar -->
+        <div class="md:hidden flex items-center justify-around border-t border-forge-border dark:border-forge-dark-border py-2 bg-forge-sand/30 dark:bg-forge-charcoal-light/30 px-2 text-[10px] font-mono overflow-x-auto">
+            <button onclick="switchTab('landing')" class="px-2 py-1 flex items-center"><i data-lucide="globe" class="w-3 h-3 mr-1"></i>Land</button>
+            <button onclick="switchTab('dashboard')" class="px-2 py-1 flex items-center"><i data-lucide="layout-dashboard" class="w-3 h-3 mr-1"></i>Dash</button>
+            <button onclick="switchTab('blueprint')" class="px-2 py-1 flex items-center"><i data-lucide="compass" class="w-3 h-3 mr-1"></i>Blueprint</button>
+            <button onclick="switchTab('questionnaire')" class="px-2 py-1 flex items-center"><i data-lucide="clipboard-list" class="w-3 h-3 mr-1"></i>37Q</button>
+            <button onclick="switchTab('workout')" class="px-2 py-1 flex items-center"><i data-lucide="dumbbell" class="w-3 h-3 mr-1"></i>Log</button>
+            <button onclick="switchTab('exercises')" class="px-2 py-1 flex items-center"><i data-lucide="book-open" class="w-3 h-3 mr-1"></i>Lib</button>
+            <button onclick="switchTab('programmes')" class="px-2 py-1 flex items-center"><i data-lucide="calendar" class="w-3 h-3 mr-1"></i>Plan</button>
+            <button onclick="switchTab('progress')" class="px-2 py-1 flex items-center"><i data-lucide="line-chart" class="w-3 h-3 mr-1"></i>Stats</button>
+            <button onclick="switchTab('nutrition')" class="px-2 py-1 flex items-center"><i data-lucide="scan-line" class="w-3 h-3 mr-1"></i>Nutr</button>
+            <button onclick="switchTab('trainer')" class="px-2 py-1 flex items-center"><i data-lucide="users" class="w-3 h-3 mr-1"></i>Coach</button>
+            <button onclick="switchTab('telemetry')" class="px-2 py-1 flex items-center"><i data-lucide="terminal" class="w-3 h-3 mr-1"></i>Proxy</button>
+        </div>
+    </header>
+
+    <!-- MAIN APP CANVAS CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 0A: PUBLIC LANDING PAGE (PART 7)                               -->
+        <!-- ===================================================================== -->
+        <section id="view-landing" class="space-y-12">
+            <!-- Hero Banner -->
+            <div class="text-center py-12 px-4 bg-forge-sand/30 dark:bg-forge-charcoal-light/40 border border-forge-border dark:border-forge-dark-border rounded-3xl space-y-6">
+                <span class="text-xs font-mono uppercase tracking-widest text-forge-rust dark:text-forge-gold px-3 py-1 rounded-full bg-forge-gold/10 border border-forge-gold/30">
+                    The Complete Athletic Operating System
+                </span>
+                <h1 class="font-serif text-4xl sm:text-6xl font-bold tracking-tight text-forge-charcoal dark:text-forge-cream">
+                    Your Body. Your Goals. <br><span class="italic text-forge-gold font-normal">Your System.</span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-sm sm:text-base text-forge-600 dark:text-forge-400 font-sans leading-relaxed">
+                    FORGE unifies adaptive AI coaching, precision workout logging, structured programme planning, deep exercise intelligence, and trainer management into one free, seamless platform.
+                </p>
+                <div class="flex flex-wrap items-center justify-center gap-4 pt-2">
+                    <button onclick="switchTab('questionnaire')" class="px-6 py-3 bg-forge-rust hover:bg-forge-rust-dark text-white font-mono text-xs font-bold rounded-xl transition shadow-lg flex items-center">
+                        <i data-lucide="sparkles" class="w-4 h-4 mr-2"></i> Personalise My Training (37Q Onboarding)
+                    </button>
+                    <button onclick="switchTab('workout')" class="px-6 py-3 bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal font-mono text-xs font-bold rounded-xl hover:opacity-90 transition flex items-center">
+                        <i data-lucide="play" class="w-4 h-4 mr-2"></i> Jump Direct To Logger
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feature Matrix Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="p-6 rounded-2xl border border-forge-border dark:border-forge-dark-border bg-forge-cream dark:bg-forge-charcoal-light space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-forge-rust/10 text-forge-rust dark:text-forge-gold flex items-center justify-center font-bold">
+                        <i data-lucide="clipboard-list" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">37Q Deep Personalisation</h3>
+                    <p class="text-xs text-forge-600 dark:text-forge-400 leading-relaxed">
+                        An extensive 37-question onboarding system capturing experience, micro-schedule availability, joint constraints, equipment access, and coaching preferences.
+                    </p>
+                </div>
+                <div class="p-6 rounded-2xl border border-forge-border dark:border-forge-dark-border bg-forge-cream dark:bg-forge-charcoal-light space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-forge-rust/10 text-forge-rust dark:text-forge-gold flex items-center justify-center font-bold">
+                        <i data-lucide="compass" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Signature Training Blueprint</h3>
+                    <p class="text-xs text-forge-600 dark:text-forge-400 leading-relaxed">
+                        A real-time, interactive central dashboard representing your macrocycle status, current fatigue, next session objectives, and AI recommendation controls.
+                    </p>
+                </div>
+                <div class="p-6 rounded-2xl border border-forge-border dark:border-forge-dark-border bg-forge-cream dark:bg-forge-charcoal-light space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-forge-rust/10 text-forge-rust dark:text-forge-gold flex items-center justify-center font-bold">
+                        <i data-lucide="terminal" class="w-5 h-5"></i>
+                    </div>
+                    <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Serverless AI & Telemetry</h3>
+                    <p class="text-xs text-forge-600 dark:text-forge-400 leading-relaxed">
+                        Privacy-first serverless proxy pipeline featuring strict safety rules, joint fatigue caps, volume safety limits, and transparent execution logging.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 0B: PERSONAL DASHBOARD OVERVIEW (PART 19)                      -->
+        <!-- ===================================================================== -->
+        <section id="view-dashboard" class="space-y-6 hidden">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                <div>
+                    <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Athlete Command Center</span>
+                    <h1 class="font-serif text-3xl font-bold text-forge-charcoal dark:text-forge-cream">Welcome Back, Alex</h1>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="switchTab('workout')" class="px-4 py-2 bg-forge-rust hover:bg-forge-rust-dark text-white font-mono text-xs font-bold rounded-xl transition shadow">
+                        ▶ Start Today's Session
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Today's Training & Quick Log -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="p-6 rounded-2xl border border-forge-border dark:border-forge-dark-border bg-forge-cream dark:bg-forge-charcoal-light space-y-4">
+                        <div class="flex justify-between items-center border-b border-forge-border/40 dark:border-forge-dark-border/40 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                                <h3 class="font-serif font-bold text-lg text-forge-charcoal dark:text-forge-cream">Scheduled Session For Today</h3>
+                            </div>
+                            <span class="text-xs font-mono text-forge-gold">Upper Body Hypertrophy W3D2</span>
+                        </div>
+                        <p class="text-xs text-forge-600 dark:text-forge-400 font-sans">
+                            Focusing on Incline Bench Press, RDLs, Neutral-grip Lat Pulldowns, and Standing OHP. Target tonnage: ~7,200 lbs across 14 working sets.
+                        </p>
+                        <div class="flex gap-3 font-mono text-xs">
+                            <button onclick="switchTab('workout')" class="px-4 py-2 bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal font-bold rounded-lg hover:opacity-90">
+                                Launch Workout Logger
+                            </button>
+                            <button onclick="switchTab('blueprint')" class="px-4 py-2 border border-forge-border dark:border-forge-dark-border text-forge-charcoal dark:text-forge-cream rounded-lg hover:border-forge-gold">
+                                View Blueprint Details
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Quick Highlights -->
+                    <div class="grid grid-cols-3 gap-4 font-mono text-xs">
+                        <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                            <span class="text-[10px] uppercase text-forge-500 block">Weekly Compliance</span>
+                            <strong class="text-lg font-bold text-emerald-600 dark:text-emerald-400">100% (4/4 Sessions)</strong>
+                        </div>
+                        <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                            <span class="text-[10px] uppercase text-forge-500 block">Monthly Volume</span>
+                            <strong class="text-lg font-bold text-forge-rust dark:text-forge-gold">84,200 lbs</strong>
+                        </div>
+                        <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                            <span class="text-[10px] uppercase text-forge-500 block">Active PR Streak</span>
+                            <strong class="text-lg font-bold text-forge-charcoal dark:text-forge-cream">3 Exercises</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side Widget: AI Coach Directives -->
+                <div class="p-6 rounded-2xl border border-forge-border dark:border-forge-dark-border bg-forge-cream dark:bg-forge-charcoal-light space-y-4">
+                    <div class="flex justify-between items-center border-b border-forge-border/40 dark:border-forge-dark-border/40 pb-3">
+                        <h3 class="font-serif font-bold text-lg text-forge-charcoal dark:text-forge-cream">Contextual AI Directives</h3>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-forge-gold/20 text-forge-gold">Active</span>
+                    </div>
+                    <div class="space-y-3 text-xs font-mono">
+                        <div class="p-3 rounded-xl bg-forge-sand/50 dark:bg-forge-charcoal border border-forge-border/50 dark:border-forge-dark-border space-y-1">
+                            <span class="font-bold text-forge-rust dark:text-forge-gold block">Recovery Recommendation:</span>
+                            <p class="text-forge-600 dark:text-forge-400 text-[11px] font-sans">
+                                High tonnage on deadlifts logged 48 hrs ago. Keep RPE ≤ 8.5 on today's hinge movements.
+                            </p>
+                        </div>
+                        <div class="p-3 rounded-xl bg-forge-sand/50 dark:bg-forge-charcoal border border-forge-border/50 dark:border-forge-dark-border space-y-1">
+                            <span class="font-bold text-emerald-600 dark:text-emerald-400 block">Progression Target:</span>
+                            <p class="text-forge-600 dark:text-forge-400 text-[11px] font-sans">
+                                Incline Bench press is ripe for a +5 lb overload test on Set 1 today.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 0C: SIGNATURE TRAINING BLUEPRINT (PART 18)                      -->
+        <!-- ===================================================================== -->
+        <section id="view-blueprint" class="space-y-6 hidden">
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Central Training Philosophy</span>
+                        <h1 class="font-serif text-3xl font-bold text-forge-charcoal dark:text-forge-cream">Signature Training Blueprint</h1>
+                    </div>
+                    <button onclick="switchTab('questionnaire')" class="px-4 py-2 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal text-xs font-mono font-bold">
+                        Re-run 37Q Onboarding
+                    </button>
+                </div>
+
+                <!-- Interactive Blueprint Dashboard Core -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 font-mono text-xs">
+                    <div class="p-4 rounded-xl bg-forge-sand/30 dark:bg-forge-charcoal border border-forge-border/60 dark:border-forge-dark-border space-y-1">
+                        <span class="text-[10px] uppercase text-forge-500 block">Primary Goal</span>
+                        <strong class="text-base font-bold text-forge-charcoal dark:text-forge-cream">Strength & Hypertrophy</strong>
+                    </div>
+                    <div class="p-4 rounded-xl bg-forge-sand/30 dark:bg-forge-charcoal border border-forge-border/60 dark:border-forge-dark-border space-y-1">
+                        <span class="text-[10px] uppercase text-forge-500 block">Current Schedule</span>
+                        <strong class="text-base font-bold text-forge-charcoal dark:text-forge-cream">4 Days / Week (Upper/Lower)</strong>
+                    </div>
+                    <div class="p-4 rounded-xl bg-forge-sand/30 dark:bg-forge-charcoal border border-forge-border/60 dark:border-forge-dark-border space-y-1">
+                        <span class="text-[10px] uppercase text-forge-500 block">Progression Engine</span>
+                        <strong class="text-base font-bold text-forge-rust dark:text-forge-gold">Double Progression (RPE 8-9)</strong>
+                    </div>
+                    <div class="p-4 rounded-xl bg-forge-sand/30 dark:bg-forge-charcoal border border-forge-border/60 dark:border-forge-dark-border space-y-1">
+                        <span class="text-[10px] uppercase text-forge-500 block">Joint Constraints</span>
+                        <strong class="text-base font-bold text-emerald-600 dark:text-emerald-400">Right Anterior Shoulder Flag</strong>
+                    </div>
+                </div>
+
+                <!-- 5 Essential Blueprint Questions Solved -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+                    <div class="p-4 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/20 dark:bg-forge-charcoal/30 space-y-1">
+                        <strong class="font-serif text-sm font-bold text-forge-charcoal dark:text-forge-cream">1. What am I working towards?</strong>
+                        <p class="text-forge-600 dark:text-forge-400">Targeting a 275lb Bench Press and 405lb RDL while maintaining overhead mobility and zero joint pain.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/20 dark:bg-forge-charcoal/30 space-y-1">
+                        <strong class="font-serif text-sm font-bold text-forge-charcoal dark:text-forge-cream">2. What programme am I following?</strong>
+                        <p class="text-forge-600 dark:text-forge-400">6-Week Upper/Lower Hypertrophy Block 2 (Week 3 Active).</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/20 dark:bg-forge-charcoal/30 space-y-1">
+                        <strong class="font-serif text-sm font-bold text-forge-charcoal dark:text-forge-cream">3. What should I do next?</strong>
+                        <p class="text-forge-600 dark:text-forge-400">Execute Upper Body Strength Session today with 90s enforced rest timers.</p>
+                    </div>
+                    <div class="p-4 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/20 dark:bg-forge-charcoal/30 space-y-1">
+                        <strong class="font-serif text-sm font-bold text-forge-charcoal dark:text-forge-cream">4. How is my training progressing?</strong>
+                        <p class="text-forge-600 dark:text-forge-400">+4.2% total tonnage increase week-over-week across all compound pushes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 0D: EXTENSIVE 37-QUESTION AI ONBOARDING (PART 9)               -->
+        <!-- ===================================================================== -->
+        <section id="view-questionnaire" class="space-y-6 hidden">
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Deep Personalisation Engine</span>
+                        <h1 class="font-serif text-3xl font-bold text-forge-charcoal dark:text-forge-cream">37Q Athletic Onboarding</h1>
+                    </div>
+                    <span id="quiz-progress-text" class="text-xs font-mono text-forge-gold font-bold">Section A • Question 1 of 37</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-2 rounded-full overflow-hidden">
+                    <div id="quiz-progress-bar" class="bg-forge-rust dark:bg-forge-gold h-full transition-all duration-300" style="width: 5%"></div>
+                </div>
+
+                <!-- Questionnaire Dynamic Container -->
+                <div id="quiz-card-container" class="space-y-6 font-mono text-xs">
+                    <!-- Injected dynamically via JavaScript -->
+                </div>
+
+                <!-- Navigation Controls -->
+                <div class="flex justify-between items-center pt-4 border-t border-forge-border/60 dark:border-forge-dark-border/60">
+                    <button onclick="prevQuizQuestion()" id="quiz-prev-btn" class="px-4 py-2 rounded-xl border border-forge-border dark:border-forge-dark-border text-forge-charcoal dark:text-forge-cream disabled:opacity-30">
+                        ← Previous
+                    </button>
+                    <button onclick="skipQuiz()" class="px-4 py-2 text-forge-500 hover:text-forge-charcoal dark:hover:text-forge-cream underline">
+                        Skip & Plan Manually
+                    </button>
+                    <button onclick="nextQuizQuestion()" id="quiz-next-btn" class="px-6 py-2.5 rounded-xl bg-forge-rust hover:bg-forge-rust-dark text-white font-bold transition shadow">
+                        Next Question →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 1: WORKOUT LOGGER & REST TIMER                                 -->
+        <!-- ===================================================================== -->
+        <section id="view-workout" class="space-y-6">
+            
+            <!-- Session Meta Header & Rest Timer Box -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Training Block Overview -->
+                <div class="lg:col-span-2 bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                        <div>
+                            <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase tracking-wider font-semibold">Macrocycle Block 2 • Week 3 of 6</span>
+                            <h1 class="font-serif text-2xl sm:text-3xl font-bold mt-1 text-forge-charcoal dark:text-forge-cream">Upper Body Strength & Hypertrophy</h1>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-3 py-1 rounded-full bg-forge-olive/10 text-forge-olive dark:text-emerald-400 font-mono text-xs font-medium border border-forge-olive/30 flex items-center">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-2"></span>In Progress
+                            </span>
+                            <button onclick="addNewExercisePrompt()" class="px-3 py-1.5 rounded-lg bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal text-xs font-mono font-semibold hover:opacity-90 transition">
+                                + Add Exercise
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 font-mono text-xs text-forge-700 dark:text-forge-300">
+                        <div class="bg-forge-sand/40 dark:bg-forge-charcoal/50 p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border">
+                            <span class="text-[10px] uppercase text-forge-500 block">Target Volume</span>
+                            <strong class="text-sm font-sans font-bold text-forge-charcoal dark:text-forge-cream">14 Total Sets</strong>
+                        </div>
+                        <div class="bg-forge-sand/40 dark:bg-forge-charcoal/50 p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border">
+                            <span class="text-[10px] uppercase text-forge-500 block">Logged Tonnage</span>
+                            <strong id="logged-tonnage" class="text-sm font-sans font-bold text-forge-rust dark:text-forge-gold">6,840 lbs</strong>
+                        </div>
+                        <div class="bg-forge-sand/40 dark:bg-forge-charcoal/50 p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border">
+                            <span class="text-[10px] uppercase text-forge-500 block">Primary Focus</span>
+                            <strong class="text-sm font-sans font-bold text-forge-charcoal dark:text-forge-cream">Push / Hinge</strong>
+                        </div>
+                        <div class="bg-forge-sand/40 dark:bg-forge-charcoal/50 p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border">
+                            <span class="text-[10px] uppercase text-forge-500 block">Session RPE</span>
+                            <strong class="text-sm font-sans font-bold text-forge-charcoal dark:text-forge-cream">8.5 Target</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Rest Timer Widget -->
+                <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm text-center space-y-4 relative overflow-hidden">
+                    <div class="flex justify-between items-center border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                        <span class="text-xs font-mono uppercase tracking-wider text-forge-700 dark:text-forge-400 font-semibold flex items-center">
+                            <i data-lucide="timer" class="w-4 h-4 mr-1.5 text-forge-rust dark:text-forge-gold"></i> Rest Recovery
+                        </span>
+                        <span id="timer-status-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-forge-sand dark:bg-forge-charcoal text-forge-600 dark:text-forge-300">Ready</span>
+                    </div>
+
+                    <div class="py-2">
+                        <div id="timer-display" class="font-mono text-5xl font-extrabold tracking-tight text-forge-charcoal dark:text-forge-gold">01:30</div>
+                        <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-1.5 rounded-full mt-3 overflow-hidden">
+                            <div id="timer-progress" class="bg-forge-rust dark:bg-forge-gold h-full transition-all duration-1000" style="width: 100%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Preset Quick Buttons & Custom Controls -->
+                    <div class="space-y-2">
+                        <div class="grid grid-cols-4 gap-1.5 font-mono text-xs">
+                            <button onclick="setTimerDuration(60)" class="py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-medium">60s</button>
+                            <button onclick="setTimerDuration(90)" class="py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-medium">90s</button>
+                            <button onclick="setTimerDuration(120)" class="py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-medium">120s</button>
+                            <button onclick="setTimerDuration(180)" class="py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-medium">180s</button>
+                        </div>
+                        <div class="flex items-center space-x-2 pt-1">
+                            <button onclick="toggleTimer()" id="timer-toggle-btn" class="flex-1 py-2 rounded-xl bg-forge-rust hover:bg-forge-rust-dark text-white font-mono text-xs font-bold transition shadow-sm flex items-center justify-center">
+                                <i data-lucide="play" class="w-3.5 h-3.5 mr-1.5 fill-current"></i> Start Rest Timer
+                            </button>
+                            <button onclick="resetTimer()" class="p-2 rounded-xl border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4 text-forge-700 dark:text-forge-300"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise Logger Cards List -->
+            <div id="exercise-list-container" class="space-y-6">
+                
+                <!-- Exercise 1 Card -->
+                <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border rounded-2xl p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal flex items-center justify-center font-mono font-bold text-sm">01</span>
+                            <div>
+                                <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Barbell Incline Bench Press</h3>
+                                <div class="flex items-center space-x-2 text-xs font-mono text-forge-600 dark:text-forge-400 mt-0.5">
+                                    <span class="uppercase tracking-wider">Chest / Upper Push</span> • <span>Target: 3 Sets x 8-10 Reps</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="addSetRow(this)" class="text-xs font-mono px-3 py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition">
+                            + Add Set
+                        </button>
+                    </div>
+
+                    <!-- Set Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-mono text-xs">
+                            <thead>
+                                <tr class="text-forge-500 uppercase text-[10px] border-b border-forge-border/40 dark:border-forge-dark-border/40">
+                                    <th class="py-2 px-3 w-16">Set</th>
+                                    <th class="py-2 px-3 w-28">Type</th>
+                                    <th class="py-2 px-3 w-28">Weight (lbs)</th>
+                                    <th class="py-2 px-3 w-28">Reps</th>
+                                    <th class="py-2 px-3 w-24">Target RPE</th>
+                                    <th class="py-2 px-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-forge-border/30 dark:divide-forge-dark-border/30 set-table-body">
+                                <tr class="set-row">
+                                    <td class="py-3 px-3 font-bold text-forge-500">1</td>
+                                    <td class="py-3 px-3">
+                                        <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                                            <option value="warmup">Warm-up</option>
+                                            <option value="working" selected>Working</option>
+                                            <option value="drop">Drop Set</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-3 px-3"><input type="number" value="205" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3"><input type="number" value="10" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3 text-forge-500">RPE 8.0</td>
+                                    <td class="py-3 px-3 text-right">
+                                        <button onclick="toggleSetComplete(this, 205, 10)" class="set-complete-btn px-3 py-1.5 bg-emerald-700 text-white rounded-lg font-sans text-xs font-semibold hover:bg-emerald-800 transition">
+                                            ✓ Completed
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="set-row">
+                                    <td class="py-3 px-3 font-bold text-forge-500">2</td>
+                                    <td class="py-3 px-3">
+                                        <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                                            <option value="warmup">Warm-up</option>
+                                            <option value="working" selected>Working</option>
+                                            <option value="drop">Drop Set</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-3 px-3"><input type="number" value="225" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3"><input type="number" value="8" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3 text-forge-500">RPE 8.5</td>
+                                    <td class="py-3 px-3 text-right">
+                                        <button onclick="toggleSetComplete(this, 225, 8)" class="set-complete-btn px-3 py-1.5 bg-emerald-700 text-white rounded-lg font-sans text-xs font-semibold hover:bg-emerald-800 transition">
+                                            ✓ Completed
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="set-row">
+                                    <td class="py-3 px-3 font-bold text-forge-500">3</td>
+                                    <td class="py-3 px-3">
+                                        <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                                            <option value="warmup">Warm-up</option>
+                                            <option value="working" selected>Working</option>
+                                            <option value="drop">Drop Set</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-3 px-3"><input type="number" value="225" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3"><input type="number" value="7" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3 text-forge-500">RPE 9.0</td>
+                                    <td class="py-3 px-3 text-right">
+                                        <button onclick="toggleSetComplete(this, 225, 7)" class="set-complete-btn px-3 py-1.5 bg-forge-sand dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-cream border border-forge-border dark:border-forge-dark-border rounded-lg font-sans text-xs font-semibold hover:border-forge-gold transition">
+                                            Log Set
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Exercise 2 Card -->
+                <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border rounded-2xl p-6 shadow-sm space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <span class="w-8 h-8 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal flex items-center justify-center font-mono font-bold text-sm">02</span>
+                            <div>
+                                <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Romanian Deadlift (RDL)</h3>
+                                <div class="flex items-center space-x-2 text-xs font-mono text-forge-600 dark:text-forge-400 mt-0.5">
+                                    <span class="uppercase tracking-wider">Hamstrings / Posterior Hinge</span> • <span>Target: 3 Sets x 8 Reps</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="addSetRow(this)" class="text-xs font-mono px-3 py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition">
+                            + Add Set
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-mono text-xs">
+                            <thead>
+                                <tr class="text-forge-500 uppercase text-[10px] border-b border-forge-border/40 dark:border-forge-dark-border/40">
+                                    <th class="py-2 px-3 w-16">Set</th>
+                                    <th class="py-2 px-3 w-28">Type</th>
+                                    <th class="py-2 px-3 w-28">Weight (lbs)</th>
+                                    <th class="py-2 px-3 w-28">Reps</th>
+                                    <th class="py-2 px-3 w-24">Target RPE</th>
+                                    <th class="py-2 px-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-forge-border/30 dark:divide-forge-dark-border/30 set-table-body">
+                                <tr class="set-row">
+                                    <td class="py-3 px-3 font-bold text-forge-500">1</td>
+                                    <td class="py-3 px-3">
+                                        <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                                            <option value="warmup">Warm-up</option>
+                                            <option value="working" selected>Working</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-3 px-3"><input type="number" value="275" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3"><input type="number" value="8" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3 text-forge-500">RPE 8.0</td>
+                                    <td class="py-3 px-3 text-right">
+                                        <button onclick="toggleSetComplete(this, 275, 8)" class="set-complete-btn px-3 py-1.5 bg-emerald-700 text-white rounded-lg font-sans text-xs font-semibold hover:bg-emerald-800 transition">
+                                            ✓ Completed
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="set-row">
+                                    <td class="py-3 px-3 font-bold text-forge-500">2</td>
+                                    <td class="py-3 px-3">
+                                        <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                                            <option value="warmup">Warm-up</option>
+                                            <option value="working" selected>Working</option>
+                                        </select>
+                                    </td>
+                                    <td class="py-3 px-3"><input type="number" value="295" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3"><input type="number" value="8" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                                    <td class="py-3 px-3 text-forge-500">RPE 8.5</td>
+                                    <td class="py-3 px-3 text-right">
+                                        <button onclick="toggleSetComplete(this, 295, 8)" class="set-complete-btn px-3 py-1.5 bg-forge-sand dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-cream border border-forge-border dark:border-forge-dark-border rounded-lg font-sans text-xs font-semibold hover:border-forge-gold transition">
+                                            Log Set
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 2: SEARCHABLE EXERCISE CATALOGUE LIBRARY & BUILDER              -->
+        <!-- ===================================================================== -->
+        <section id="view-exercises" class="space-y-6 hidden">
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Comprehensive Exercise Index</span>
+                        <h2 class="font-serif font-bold text-2xl text-forge-charcoal dark:text-forge-cream">Movement Database & Custom Builder</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="openCustomExerciseModal()" class="px-3.5 py-2 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal text-xs font-mono font-bold hover:opacity-90 transition">
+                            + Create Custom Exercise
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search & Filters Bar -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 font-mono text-xs">
+                    <div class="md:col-span-2 relative">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-forge-500"></i>
+                        <input type="text" id="exercise-search-input" onkeyup="filterExerciseCatalogue()" placeholder="Search movements by name, muscle, or equipment..." class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl pl-9 pr-3 py-2.5 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                    </div>
+                    <div>
+                        <select id="exercise-category-filter" onchange="filterExerciseCatalogue()" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2.5 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                            <option value="all">All Categories</option>
+                            <option value="Push">Push / Chest / Shoulders</option>
+                            <option value="Pull">Pull / Back / Biceps</option>
+                            <option value="Legs">Legs / Quads / Hamstrings</option>
+                            <option value="Hinge">Hinge / Posterior Chain</option>
+                            <option value="Core">Core / Stability</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="exercise-equipment-filter" onchange="filterExerciseCatalogue()" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2.5 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                            <option value="all">All Equipment</option>
+                            <option value="Barbell">Barbell</option>
+                            <option value="Dumbbell">Dumbbell</option>
+                            <option value="Cable">Cable / Machine</option>
+                            <option value="Bodyweight">Bodyweight / Calisthenics</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Exercise Catalogue Grid -->
+                <div id="exercise-catalogue-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Exercise Items populated dynamically via JS -->
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 2B: PROGRAMME BUILDER & SCHEDULE CALENDAR (PART 17)            -->
+        <!-- ===================================================================== -->
+        <section id="view-programmes" class="space-y-6 hidden">
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Multi-Week Periodisation Planner</span>
+                        <h1 class="font-serif text-3xl font-bold text-forge-charcoal dark:text-forge-cream">Programmes & Schedules</h1>
+                    </div>
+                    <button onclick="alert('Creating new programme template...')" class="px-4 py-2 bg-forge-rust text-white font-mono text-xs font-bold rounded-xl shadow">
+                        + Create Programme
+                    </button>
+                </div>
+
+                <!-- Active Programme Schedule Grid -->
+                <div class="space-y-4 font-mono text-xs">
+                    <div class="flex justify-between items-center">
+                        <strong class="font-serif text-lg text-forge-charcoal dark:text-forge-cream">Hypertrophy Block 2 — Week 3 Calendar</strong>
+                        <span class="text-forge-500">4 Active Sessions • 3 Rest Days</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-7 gap-2">
+                        <div class="p-3 rounded-xl border border-forge-gold bg-forge-gold/10 space-y-1">
+                            <span class="text-[10px] uppercase font-bold text-forge-gold">Mon (Day 1)</span>
+                            <strong class="font-sans block font-bold text-forge-charcoal dark:text-forge-cream">Upper Push A</strong>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ Completed</span>
+                        </div>
+                        <div class="p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                            <span class="text-[10px] uppercase font-bold text-forge-500">Tue (Day 2)</span>
+                            <strong class="font-sans block font-bold text-forge-charcoal dark:text-forge-cream">Lower Hinge A</strong>
+                            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">✓ Completed</span>
+                        </div>
+                        <div class="p-3 rounded-xl border border-forge-border/30 dark:border-forge-dark-border/30 bg-forge-sand/10 dark:bg-forge-charcoal/20 space-y-1 opacity-60">
+                            <span class="text-[10px] uppercase font-bold text-forge-500">Wed</span>
+                            <strong class="font-sans block font-bold text-forge-500">Active Rest</strong>
+                            <span class="text-[10px] text-forge-500">Mobility</span>
+                        </div>
+                        <div class="p-3 rounded-xl border-2 border-forge-rust bg-forge-rust/10 space-y-1">
+                            <span class="text-[10px] uppercase font-bold text-forge-rust dark:text-forge-gold">Thu (Today)</span>
+                            <strong class="font-sans block font-bold text-forge-charcoal dark:text-forge-cream">Upper Push B</strong>
+                            <span class="text-[10px] text-forge-rust dark:text-forge-gold font-bold">▶ Scheduled</span>
+                        </div>
+                        <div class="p-3 rounded-xl border border-forge-border/50 dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                            <span class="text-[10px] uppercase font-bold text-forge-500">Fri</span>
+                            <strong class="font-sans block font-bold text-forge-charcoal dark:text-forge-cream">Lower Quad B</strong>
+                            <span class="text-[10px] text-forge-500">Upcoming</span>
+                        </div>
+                        <div class="p-3 rounded-xl border border-forge-border/30 dark:border-forge-dark-border/30 bg-forge-sand/10 dark:bg-forge-charcoal/20 space-y-1 opacity-60">
+                            <span class="text-[10px] uppercase font-bold text-forge-500">Sat</span>
+                            <strong class="font-sans block font-bold text-forge-500">Rest</strong>
+                            <span class="text-[10px] text-forge-500">Recovery</span>
+                        </div>
+                        <div class="p-3 rounded-xl border border-forge-border/30 dark:border-forge-dark-border/30 bg-forge-sand/10 dark:bg-forge-charcoal/20 space-y-1 opacity-60">
+                            <span class="text-[10px] uppercase font-bold text-forge-500">Sun</span>
+                            <strong class="font-sans block font-bold text-forge-500">Rest</strong>
+                            <span class="text-[10px] text-forge-500">Recovery</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 2C: PROGRESS ANALYTICS & PR TRACKING (PART 20)                 -->
+        <!-- ===================================================================== -->
+        <section id="view-progress" class="space-y-6 hidden">
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Performance Intelligence</span>
+                        <h1 class="font-serif text-3xl font-bold text-forge-charcoal dark:text-forge-cream">Analytics & Personal Records</h1>
+                    </div>
+                    <button onclick="alert('Exporting workout CSV data...')" class="px-3.5 py-2 border border-forge-border dark:border-forge-dark-border text-forge-charcoal dark:text-forge-cream font-mono text-xs rounded-xl hover:border-forge-gold">
+                        ↓ Export Workout History (CSV)
+                    </button>
+                </div>
+
+                <!-- Recorded PRs Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+                    <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                        <span class="text-[10px] text-forge-500 uppercase block">Barbell Incline Press PR</span>
+                        <strong class="text-lg font-bold text-forge-charcoal dark:text-forge-cream">225 lbs x 8 reps</strong>
+                        <span class="text-[10px] text-forge-gold block">Est. 1RM: 285 lbs</span>
+                    </div>
+                    <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                        <span class="text-[10px] text-forge-500 uppercase block">Romanian Deadlift PR</span>
+                        <strong class="text-lg font-bold text-forge-charcoal dark:text-forge-cream">295 lbs x 8 reps</strong>
+                        <span class="text-[10px] text-forge-gold block">Est. 1RM: 372 lbs</span>
+                    </div>
+                    <div class="p-4 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 space-y-1">
+                        <span class="text-[10px] text-forge-500 uppercase block">Total Lifetime Tonnage</span>
+                        <strong class="text-lg font-bold text-forge-rust dark:text-forge-gold">412,850 lbs</strong>
+                        <span class="text-[10px] text-forge-500 block">68 Logged Sessions</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 3: NUTRITION & AI VISION PHOTO SCANNER                         -->
+        <!-- ===================================================================== -->
+        <section id="view-nutrition" class="space-y-6 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Left Column: Interactive AI Vision Scanner Studio -->
+                <div class="lg:col-span-2 bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-5">
+                    
+                    <div class="border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3 flex justify-between items-center">
+                        <div>
+                            <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Multi-Modal Computer Vision Engine</span>
+                            <h2 class="font-serif font-bold text-2xl text-forge-charcoal dark:text-forge-cream">AI Food & Macro Recognition</h2>
+                        </div>
+                        <span class="text-xs font-mono px-2.5 py-1 rounded-full bg-forge-gold/20 text-forge-700 dark:text-forge-gold border border-forge-gold/30 font-semibold">
+                            Gemini Vision Active
+                        </span>
+                    </div>
+
+                    <!-- Preset Sample Selector or File Input -->
+                    <div class="space-y-2">
+                        <label class="block text-xs font-mono font-medium text-forge-600 dark:text-forge-400">Select Preset Meal Photo or Drag & Drop:</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <button onclick="selectSampleMeal('salmon')" id="sample-salmon" class="sample-meal-btn p-3 rounded-xl border border-forge-gold bg-forge-gold/10 text-left transition font-mono text-xs">
+                                <strong class="block font-serif font-bold text-sm text-forge-charcoal dark:text-forge-cream">Salmon Bowl</strong>
+                                <span class="text-[10px] text-forge-600 dark:text-forge-400">Grilled Salmon, Rice & Avocado</span>
+                            </button>
+                            <button onclick="selectSampleMeal('steak')" id="sample-steak" class="sample-meal-btn p-3 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/40 dark:bg-forge-charcoal text-left transition font-mono text-xs hover:border-forge-gold">
+                                <strong class="block font-serif font-bold text-sm text-forge-charcoal dark:text-forge-cream">Sirloin Steak</strong>
+                                <span class="text-[10px] text-forge-600 dark:text-forge-400">Prime Steak, Potatoes & Asparagus</span>
+                            </button>
+                            <button onclick="selectSampleMeal('oats')" id="sample-oats" class="sample-meal-btn p-3 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/40 dark:bg-forge-charcoal text-left transition font-mono text-xs hover:border-forge-gold">
+                                <strong class="block font-serif font-bold text-sm text-forge-charcoal dark:text-forge-cream">Protein Oats</strong>
+                                <span class="text-[10px] text-forge-600 dark:text-forge-400">Oats, Whey, Berries & Almonds</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload / Preview Canvas Box -->
+                    <div class="border-2 border-dashed border-forge-border dark:border-forge-dark-border rounded-2xl p-6 text-center bg-forge-sand/30 dark:bg-forge-charcoal/40 relative space-y-3">
+                        <div id="meal-preview-box" class="flex flex-col items-center justify-center py-4">
+                            <div class="w-20 h-20 rounded-2xl bg-forge-gold/20 flex items-center justify-center text-4xl mb-2 shadow-inner" id="meal-emoji-preview">
+                                🥗
+                            </div>
+                            <h4 id="meal-title-preview" class="font-serif font-bold text-lg text-forge-charcoal dark:text-forge-cream">Grilled Salmon & Wild Rice Bowl</h4>
+                            <p id="meal-desc-preview" class="text-xs font-mono text-forge-600 dark:text-forge-400 max-w-md">Estimated portion: 180g Atlantic Salmon, 150g Brown Rice, 60g Avocado.</p>
+                        </div>
+
+                        <div class="flex items-center justify-center space-x-3 pt-2">
+                            <button onclick="triggerVisionScan()" id="scan-vision-btn" class="px-6 py-2.5 rounded-xl bg-forge-rust hover:bg-forge-rust-dark text-white font-mono text-xs font-bold transition shadow-md flex items-center">
+                                <i data-lucide="scan" class="w-4 h-4 mr-2"></i> Run AI Vision Extraction
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Live AI Detection Results Card -->
+                    <div id="ai-nutrition-results" class="hidden p-5 rounded-2xl border border-forge-gold/40 bg-forge-gold/10 space-y-3 font-mono text-xs">
+                        <div class="flex justify-between items-center text-forge-charcoal dark:text-forge-cream">
+                            <span class="font-bold flex items-center text-emerald-700 dark:text-emerald-400">
+                                <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Vision Match: 98.4% Confidence
+                            </span>
+                            <span class="text-[10px] text-forge-500">Latency: 284ms</span>
+                        </div>
+
+                        <div class="grid grid-cols-4 gap-2 text-center py-2 border-y border-forge-gold/30">
+                            <div>
+                                <span class="text-[10px] uppercase text-forge-500 block">Calories</span>
+                                <strong id="res-cal" class="text-base font-bold text-forge-charcoal dark:text-forge-cream">620 kcal</strong>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase text-forge-500 block">Protein</span>
+                                <strong id="res-pro" class="text-base font-bold text-forge-rust dark:text-forge-gold">46g</strong>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase text-forge-500 block">Carbs</span>
+                                <strong id="res-carb" class="text-base font-bold text-blue-600 dark:text-blue-400">54g</strong>
+                            </div>
+                            <div>
+                                <span class="text-[10px] uppercase text-forge-500 block">Fats</span>
+                                <strong id="res-fat" class="text-base font-bold text-amber-600">22g</strong>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-[11px] text-forge-600 dark:text-forge-400">Add extracted breakdown directly to daily total?</span>
+                            <button onclick="commitNutritionLog()" class="px-4 py-1.5 bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal font-bold rounded-lg hover:opacity-90 transition">
+                                + Commit Meal to Diary
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Live Macro Progress Tracker -->
+                <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                    <div class="border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Daily Intake Matrix</span>
+                        <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Target Adherence</h3>
+                    </div>
+
+                    <!-- Macro Progress Bars -->
+                    <div class="space-y-4 font-mono text-xs">
+                        <!-- Calories Bar -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-forge-charcoal dark:text-forge-cream">Calories</span>
+                                <span id="macro-cal-text" class="text-forge-600 dark:text-forge-400">1,820 / 2,600 kcal</span>
+                            </div>
+                            <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-2.5 rounded-full overflow-hidden border border-forge-border/40 dark:border-forge-dark-border">
+                                <div id="macro-cal-bar" class="bg-forge-charcoal dark:bg-forge-cream h-full transition-all duration-700" style="width: 70%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Protein Bar -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-forge-rust dark:text-forge-gold">Protein (Target 200g)</span>
+                                <span id="macro-pro-text" class="text-forge-600 dark:text-forge-400">154g (77%)</span>
+                            </div>
+                            <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-2.5 rounded-full overflow-hidden border border-forge-border/40 dark:border-forge-dark-border">
+                                <div id="macro-pro-bar" class="bg-forge-rust dark:bg-forge-gold h-full transition-all duration-700" style="width: 77%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Carbs Bar -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-blue-600 dark:text-blue-400">Carbohydrates (Target 275g)</span>
+                                <span id="macro-carb-text" class="text-forge-600 dark:text-forge-400">210g (76%)</span>
+                            </div>
+                            <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-2.5 rounded-full overflow-hidden border border-forge-border/40 dark:border-forge-dark-border">
+                                <div id="macro-carb-bar" class="bg-blue-600 dark:bg-blue-400 h-full transition-all duration-700" style="width: 76%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Fat Bar -->
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="font-semibold text-amber-600">Fats (Target 70g)</span>
+                                <span id="macro-fat-text" class="text-forge-600 dark:text-forge-400">52g (74%)</span>
+                            </div>
+                            <div class="w-full bg-forge-sand dark:bg-forge-charcoal h-2.5 rounded-full overflow-hidden border border-forge-border/40 dark:border-forge-dark-border">
+                                <div id="macro-fat-bar" class="bg-amber-600 h-full transition-all duration-700" style="width: 74%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Meal Logs Stream -->
+                    <div class="space-y-3 pt-2">
+                        <span class="text-xs font-mono font-bold uppercase tracking-wider text-forge-500 block border-b border-forge-border/40 dark:border-forge-dark-border/40 pb-1">Logged Today</span>
+                        <div id="meal-logs-stream" class="space-y-2 text-xs font-mono">
+                            <div class="p-2.5 rounded-xl bg-forge-sand/40 dark:bg-forge-charcoal flex justify-between items-center">
+                                <div>
+                                    <strong class="font-serif text-sm block">Breakfast: Eggs & Avocado Toast</strong>
+                                    <span class="text-[10px] text-forge-500">540 kcal • 32g P • 48g C</span>
+                                </div>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold">Logged</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-forge-sand/40 dark:bg-forge-charcoal flex justify-between items-center">
+                                <div>
+                                    <strong class="font-serif text-sm block">Post-Workout Whey Shake</strong>
+                                    <span class="text-[10px] text-forge-500">280 kcal • 50g P • 12g C</span>
+                                </div>
+                                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold">Logged</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 3: TRAINER PORTAL & CLIENT ROSTER                              -->
+        <!-- ===================================================================== -->
+        <section id="view-trainer" class="space-y-6 hidden">
+            
+            <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                    <div>
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Coach Management Console</span>
+                        <h2 class="font-serif font-bold text-2xl text-forge-charcoal dark:text-forge-cream">Client Roster & Compliance Matrix</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="alert('Invitation link copied to clipboard!')" class="px-3.5 py-2 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal text-xs font-mono font-bold hover:opacity-90 transition">
+                            + Invite Athlete
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Client Roster Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left font-mono text-xs">
+                        <thead>
+                            <tr class="text-forge-500 uppercase text-[10px] border-b border-forge-border/60 dark:border-forge-dark-border/60">
+                                <th class="py-3 px-4">Athlete</th>
+                                <th class="py-3 px-4">Assigned Block</th>
+                                <th class="py-3 px-4">Adherence Rate</th>
+                                <th class="py-3 px-4">Last Activity</th>
+                                <th class="py-3 px-4 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-forge-border/40 dark:divide-forge-dark-border/40">
+                            <tr class="hover:bg-forge-sand/30 dark:hover:bg-forge-charcoal/50 transition">
+                                <td class="py-3.5 px-4 font-sans">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-forge-rust text-white flex items-center justify-center font-mono font-bold">AM</div>
+                                        <div>
+                                            <strong class="block text-sm font-bold text-forge-charcoal dark:text-forge-cream">Alex Mercer</strong>
+                                            <span class="text-[10px] text-forge-500">alex.m@forge.io</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="font-bold text-forge-charcoal dark:text-forge-cream">Hypertrophy Block 2</span>
+                                    <span class="text-[10px] text-forge-500 block">Week 3 / 6</span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-bold">96% Compliance</span>
+                                    <span class="text-[10px] text-forge-500 block">14 / 14 Sets Logged</span>
+                                </td>
+                                <td class="py-3.5 px-4 text-forge-600 dark:text-forge-400">
+                                    Today, 09:15 AM
+                                </td>
+                                <td class="py-3.5 px-4 text-right">
+                                    <button onclick="openClientDrawer('Alex Mercer', 'Hypertrophy Block 2')" class="px-3 py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-bold text-forge-charcoal dark:text-forge-cream">
+                                        Inspect Journal
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-forge-sand/30 dark:hover:bg-forge-charcoal/50 transition">
+                                <td class="py-3.5 px-4 font-sans">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-mono font-bold">SJ</div>
+                                        <div>
+                                            <strong class="block text-sm font-bold text-forge-charcoal dark:text-forge-cream">Sarah Jenkins</strong>
+                                            <span class="text-[10px] text-forge-500">s.jenkins@forge.io</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="font-bold text-forge-charcoal dark:text-forge-cream">Strength Peak W1</span>
+                                    <span class="text-[10px] text-forge-500 block">Week 1 / 4</span>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <span class="text-amber-600 font-bold">82% Compliance</span>
+                                    <span class="text-[10px] text-forge-500 block">10 / 12 Sets Logged</span>
+                                </td>
+                                <td class="py-3.5 px-4 text-forge-600 dark:text-forge-400">
+                                    Yesterday
+                                </td>
+                                <td class="py-3.5 px-4 text-right">
+                                    <button onclick="openClientDrawer('Sarah Jenkins', 'Strength Peak W1')" class="px-3 py-1.5 rounded-lg border border-forge-border dark:border-forge-dark-border hover:bg-forge-sand dark:hover:bg-forge-charcoal transition font-bold text-forge-charcoal dark:text-forge-cream">
+                                        Inspect Journal
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ===================================================================== -->
+        <!-- MODULE 4: AI SERVERLESS PROXY TELEMETRY CONSOLE                       -->
+        <!-- ===================================================================== -->
+        <section id="view-telemetry" class="space-y-6 hidden">
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Left Sandbox Controls -->
+                <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border p-6 rounded-2xl shadow-sm space-y-4">
+                    <div class="border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                        <span class="text-xs font-mono text-forge-rust dark:text-forge-gold uppercase font-semibold">Proxy Testing Sandbox</span>
+                        <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">AI Guidance Prompt</h3>
+                    </div>
+
+                    <div class="space-y-3 font-mono text-xs">
+                        <div>
+                            <label class="block text-forge-600 dark:text-forge-400 mb-1">Athlete Context Prompt:</label>
+                            <textarea id="telemetry-prompt" rows="4" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl p-3 focus:outline-none focus:border-forge-gold text-forge-charcoal dark:text-forge-cream resize-none">Athlete reports 8/10 fatigue on right shoulder during bench press. Re-evaluate session volume caps and suggest joint-friendly alternatives.</textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-forge-600 dark:text-forge-400 mb-1">Safety Guardrail Flags:</label>
+                            <div class="space-y-1 text-[11px]">
+                                <label class="flex items-center space-x-2"><input type="checkbox" checked disabled class="accent-forge-gold"> <span>Volume Cap Safeguard (&lt; 22 sets/week)</span></label>
+                                <label class="flex items-center space-x-2"><input type="checkbox" checked disabled class="accent-forge-gold"> <span>Joint Stress Filter</span></label>
+                                <label class="flex items-center space-x-2"><input type="checkbox" checked disabled class="accent-forge-gold"> <span>Systemic Fatigue Cap</span></label>
+                            </div>
+                        </div>
+
+                        <button onclick="runTelemetryProxyTest()" id="dispatch-proxy-btn" class="w-full py-2.5 rounded-xl bg-forge-rust hover:bg-forge-rust-dark text-white font-bold transition shadow-md flex items-center justify-center">
+                            <i data-lucide="send" class="w-3.5 h-3.5 mr-2"></i> Dispatch Proxy Request
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Terminal Output Stream -->
+                <div class="lg:col-span-2 bg-forge-900 text-forge-100 rounded-2xl p-6 border border-forge-800 shadow-xl space-y-4 font-mono text-xs">
+                    
+                    <div class="flex justify-between items-center border-b border-forge-800 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                            <span class="text-forge-400 text-[11px] ml-2">/api/ai-coaching telemetry terminal</span>
+                        </div>
+                        <span id="proxy-status-pill" class="text-[10px] px-2.5 py-0.5 rounded bg-forge-800 text-forge-300">IDLE</span>
+                    </div>
+
+                    <!-- Telemetry Terminal Stream Logs -->
+                    <div id="telemetry-log-stream" class="space-y-2 h-72 overflow-y-auto custom-scrollbar text-[11px] leading-relaxed">
+                        <div class="text-forge-500">// Ready to inspect serverless gateway operations...</div>
+                        <div class="text-forge-500">// Requests execute through sanitized proxy with RLS token verification.</div>
+                    </div>
+
+                    <!-- Decoded AI Response Payload Card -->
+                    <div id="decoded-ai-output" class="hidden p-4 rounded-xl bg-forge-800/80 border border-forge-700 text-forge-100 space-y-2">
+                        <div class="text-forge-gold font-bold text-xs uppercase flex items-center">
+                            <i data-lucide="cpu" class="w-4 h-4 mr-1.5"></i> AI Directive Recommendation Output:
+                        </div>
+                        <div id="decoded-output-text" class="text-xs text-forge-200">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- MODALS & DRAWERS                                                      -->
+    <!-- ===================================================================== -->
+
+    <!-- Custom Exercise Creator Modal -->
+    <div id="custom-exercise-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Create Custom Movement</h3>
+                <button onclick="closeCustomExerciseModal()" class="text-forge-500 hover:text-forge-charcoal dark:hover:text-forge-cream text-lg font-bold">&times;</button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); submitCustomExercise();" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block mb-1 text-forge-600 dark:text-forge-400">Exercise Name</label>
+                    <input type="text" id="custom-ex-name" placeholder="e.g. Incline Cable Flye" required class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block mb-1 text-forge-600 dark:text-forge-400">Movement Pattern</label>
+                        <select id="custom-ex-pattern" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                            <option value="Push">Push</option>
+                            <option value="Pull">Pull</option>
+                            <option value="Legs">Legs</option>
+                            <option value="Hinge">Hinge</option>
+                            <option value="Core">Core</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 text-forge-600 dark:text-forge-400">Equipment</label>
+                        <select id="custom-ex-equip" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                            <option value="Barbell">Barbell</option>
+                            <option value="Dumbbell">Dumbbell</option>
+                            <option value="Cable">Cable</option>
+                            <option value="Bodyweight">Bodyweight</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block mb-1 text-forge-600 dark:text-forge-400">Primary Muscle Group</label>
+                    <input type="text" id="custom-ex-muscle" placeholder="e.g. Pectoralis Major (Upper)" required class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-forge-rust hover:bg-forge-rust-dark text-white font-bold rounded-xl transition shadow">
+                    Save to Library
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Authentication Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+        <div class="bg-forge-cream dark:bg-forge-charcoal-light border border-forge-border dark:border-forge-dark-border rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-3">
+                <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">Authenticate Account</h3>
+                <button onclick="closeAuthModal()" class="text-forge-500 hover:text-forge-charcoal dark:hover:text-forge-cream text-lg font-bold">&times;</button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); closeAuthModal();" class="space-y-4 font-mono text-xs">
+                <div>
+                    <label class="block mb-1 text-forge-600 dark:text-forge-400">Email Address</label>
+                    <input type="email" value="alex.mercer@forge.io" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                </div>
+                <div>
+                    <label class="block mb-1 text-forge-600 dark:text-forge-400">Password</label>
+                    <input type="password" value="••••••••••••" class="w-full bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-xl px-3 py-2 text-forge-charcoal dark:text-forge-cream focus:outline-none focus:border-forge-gold">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-forge-rust hover:bg-forge-rust-dark text-white font-bold rounded-xl transition shadow">
+                    Sign In to FORGE
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Client Detail Modal Drawer -->
+    <div id="client-drawer" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-end hidden">
+        <div class="bg-forge-cream dark:bg-forge-charcoal-light border-l border-forge-border dark:border-forge-dark-border h-full max-w-lg w-full p-6 shadow-2xl space-y-5 overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-forge-border/60 dark:border-forge-dark-border/60 pb-4">
+                <div>
+                    <h3 id="drawer-client-name" class="font-serif font-bold text-2xl text-forge-charcoal dark:text-forge-cream">Alex Mercer</h3>
+                    <p id="drawer-client-block" class="text-xs font-mono text-forge-gold">Hypertrophy Block 2</p>
+                </div>
+                <button onclick="closeClientDrawer()" class="text-forge-500 text-xl font-bold">&times;</button>
+            </div>
+
+            <div class="space-y-4 font-mono text-xs">
+                <div class="p-4 rounded-xl bg-forge-sand/40 dark:bg-forge-charcoal border border-forge-border/60 dark:border-forge-dark-border space-y-2">
+                    <span class="text-[10px] uppercase font-bold text-forge-500">Recent Session Adherence</span>
+                    <p class="text-sm font-sans font-bold text-forge-charcoal dark:text-forge-cream">Upper Body Push & Hinge — 100% Completed</p>
+                    <p class="text-forge-600 dark:text-forge-400 text-[11px]">Logged 6,840 lbs tonnage across 5 working sets. Zero pain flags noted.</p>
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button onclick="alert('Blueprint update dispatched!')" class="flex-1 py-2 rounded-xl bg-forge-charcoal dark:bg-forge-gold text-forge-cream dark:text-forge-charcoal font-bold transition">
+                        Assign New Blueprint
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-forge-border dark:border-forge-dark-border py-4 text-center text-xs font-mono text-forge-500">
+        <p>FORGE Systems &copy; 2026 • Evidence-Based Athletic Engineering & AI Gateway</p>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- APPLICATION LOGIC                                                     -->
+    <!-- ===================================================================== -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // 37-Question Onboarding State & Questions Array
+        const quizQuestions = [
+            { sec: "A", q: "1. What best describes your current training experience?", opts: ["Complete beginner", "Beginner with some experience", "Returning after a break", "Intermediate", "Advanced", "Competitive athlete"] },
+            { sec: "A", q: "2. How regularly do you currently exercise?", opts: ["Not currently exercising", "1–2 times per week", "3–4 times per week", "5–6 times per week", "Almost every day"] },
+            { sec: "B", q: "5. What are your primary fitness goals?", opts: ["General fitness", "Building strength", "Improving endurance", "Improving athletic performance", "Building muscle"] },
+            { sec: "C", q: "10. Which training styles interest you most?", opts: ["Strength training", "Bodyweight / Calisthenics", "Functional fitness", "Athletic conditioning", "Mobility"] },
+            { sec: "D", q: "15. Where do you normally train?", opts: ["Commercial gym", "Home gym", "Home without dedicated equipment", "Outdoors", "Sports facility"] },
+            { sec: "E", q: "19. How many days per week would you like to train?", opts: ["1-2 Days", "3 Days", "4 Days", "5 Days", "6 Days"] },
+            { sec: "F", q: "24. How would you prefer workouts to be organised?", opts: ["Individual workouts", "Weekly schedules", "Multi-week periodised blocks", "Let FORGE recommend"] },
+            { sec: "G", q: "29. How involved should FORGE AI coaching be?", opts: ["Initial programme only", "Occasional recommendations", "Active adaptive coaching", "Full automated program updates"] },
+            { sec: "H", q: "33. Are there movements or joints you currently need to modify?", opts: ["No known limitations", "Shoulder joint discomfort", "Lower back sensitivity", "Knee/Patellar discomfort"] }
+        ];
+
+        let currentQuizIndex = 0;
+
+        function renderQuizQuestion() {
+            const container = document.getElementById('quiz-card-container');
+            if (!container) return;
+            const q = quizQuestions[currentQuizIndex];
+            
+            document.getElementById('quiz-progress-text').innerText = `Section ${q.sec} • Question ${currentQuizIndex + 1} of 37 (Sample View)`;
+            const pct = ((currentQuizIndex + 1) / quizQuestions.length) * 100;
+            document.getElementById('quiz-progress-bar').style.width = `${pct}%`;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <h3 class="font-serif font-bold text-xl text-forge-charcoal dark:text-forge-cream">${q.q}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${q.opts.map(opt => `
+                            <button onclick="selectQuizOption(this)" class="quiz-opt-btn p-3.5 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 text-left hover:border-forge-gold transition">
+                                <span class="font-bold font-sans">${opt}</span>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('quiz-prev-btn').disabled = (currentQuizIndex === 0);
+        }
+
+        function selectQuizOption(btn) {
+            document.querySelectorAll('.quiz-opt-btn').forEach(b => {
+                b.className = "quiz-opt-btn p-3.5 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/30 dark:bg-forge-charcoal/40 text-left hover:border-forge-gold transition";
+            });
+            btn.className = "quiz-opt-btn p-3.5 rounded-xl border-2 border-forge-gold bg-forge-gold/10 text-left transition font-bold";
+        }
+
+        function nextQuizQuestion() {
+            if (currentQuizIndex < quizQuestions.length - 1) {
+                currentQuizIndex++;
+                renderQuizQuestion();
+            } else {
+                alert("37Q Onboarding complete! Blueprint updated.");
+                switchTab('blueprint');
+            }
+        }
+
+        function prevQuizQuestion() {
+            if (currentQuizIndex > 0) {
+                currentQuizIndex--;
+                renderQuizQuestion();
+            }
+        }
+
+        function skipQuiz() {
+            switchTab('workout');
+        }
+
+        // Exercise Library Database
+        const defaultExercises = [
+            { name: "Barbell Incline Bench Press", pattern: "Push", equipment: "Barbell", muscle: "Upper Chest", desc: "Compound incline press targeting the clavicular head of the pectoralis major." },
+            { name: "Romanian Deadlift (RDL)", pattern: "Hinge", equipment: "Barbell", muscle: "Hamstrings & Glutes", desc: "Posterior chain hinge emphasizing hamstring lengthening and hip extension." },
+            { name: "Bulgarian Split Squat", pattern: "Legs", equipment: "Dumbbell", muscle: "Quadriceps & Glutes", desc: "Unilateral leg drive focused on quad stability and unilateral hip force development." },
+            { name: "Lat Pulldown (Neutral Grip)", pattern: "Pull", equipment: "Cable", muscle: "Latissimus Dorsi", desc: "Vertical pull targeting lat width with reduced shoulder impingement risk." },
+            { name: "Standing Overhead Press", pattern: "Push", equipment: "Barbell", muscle: "Anterior Deltoids", desc: "Strict vertical push engaging core stability and shoulder girdle strength." },
+            { name: "Hanging Leg Raise", pattern: "Core", equipment: "Bodyweight", muscle: "Rectus Abdominis", desc: "Strict gymnastics core flexion targeting lower abdominals and hip flexors." }
+        ];
+
+        let exerciseCatalogue = [...defaultExercises];
+
+        function renderExerciseCatalogue(items = exerciseCatalogue) {
+            const grid = document.getElementById('exercise-catalogue-grid');
+            if (!grid) return;
+            grid.innerHTML = items.map(ex => `
+                <div class="bg-forge-sand/30 dark:bg-forge-charcoal/50 border border-forge-border/60 dark:border-forge-dark-border p-4 rounded-xl space-y-2">
+                    <div class="flex justify-between items-start">
+                        <strong class="font-serif font-bold text-base text-forge-charcoal dark:text-forge-cream">${ex.name}</strong>
+                        <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-forge-gold/20 text-forge-700 dark:text-forge-gold border border-forge-gold/30 font-bold uppercase">${ex.pattern}</span>
+                    </div>
+                    <div class="text-[11px] font-mono text-forge-600 dark:text-forge-400">
+                        <span>Equipment: ${ex.equipment}</span> • <span>Target: ${ex.muscle}</span>
+                    </div>
+                    <p class="text-xs text-forge-700 dark:text-forge-300 font-sans leading-relaxed">${ex.desc}</p>
+                </div>
+            `).join('');
+        }
+
+        function filterExerciseCatalogue() {
+            const search = document.getElementById('exercise-search-input').value.toLowerCase();
+            const category = document.getElementById('exercise-category-filter').value;
+            const equipment = document.getElementById('exercise-equipment-filter').value;
+
+            const filtered = exerciseCatalogue.filter(ex => {
+                const matchesSearch = ex.name.toLowerCase().includes(search) || ex.muscle.toLowerCase().includes(search);
+                const matchesCategory = category === 'all' || ex.pattern === category;
+                const matchesEquip = equipment === 'all' || ex.equipment === equipment;
+                return matchesSearch && matchesCategory && matchesEquip;
+            });
+
+            renderExerciseCatalogue(filtered);
+        }
+
+        function openCustomExerciseModal() {
+            document.getElementById('custom-exercise-modal').classList.remove('hidden');
+        }
+
+        function closeCustomExerciseModal() {
+            document.getElementById('custom-exercise-modal').classList.add('hidden');
+        }
+
+        function submitCustomExercise() {
+            const name = document.getElementById('custom-ex-name').value;
+            const pattern = document.getElementById('custom-ex-pattern').value;
+            const equipment = document.getElementById('custom-ex-equip').value;
+            const muscle = document.getElementById('custom-ex-muscle').value;
+
+            const newEx = { name, pattern, equipment, muscle, desc: "Custom athlete movement added to local library." };
+            exerciseCatalogue.unshift(newEx);
+            renderExerciseCatalogue();
+            closeCustomExerciseModal();
+            alert(`Custom exercise "${name}" saved to library!`);
+        }
+
+        // Dark Mode Toggle Logic
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+        }
+
+        // Tab Navigation System
+        function switchTab(tabId) {
+            ['landing', 'dashboard', 'blueprint', 'questionnaire', 'workout', 'exercises', 'programmes', 'progress', 'nutrition', 'trainer', 'telemetry'].forEach(t => {
+                const el = document.getElementById(`view-${t}`);
+                if (el) el.classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) btn.className = "px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all text-forge-700 dark:text-forge-400 hover:text-forge-charcoal dark:hover:text-forge-cream";
+            });
+            const activeEl = document.getElementById(`view-${tabId}`);
+            if (activeEl) activeEl.classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            if (activeBtn) activeBtn.className = "px-3 py-2 rounded-lg text-xs font-mono font-medium transition-all bg-forge-cream dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-gold shadow-sm border border-forge-border/50 dark:border-forge-dark-border";
+            
+            if (tabId === 'exercises') {
+                renderExerciseCatalogue();
+            } else if (tabId === 'questionnaire') {
+                renderQuizQuestion();
+            }
+        }
+
+        // Rest Timer State & Controls
+        let timerSeconds = 90;
+        let totalTimerSeconds = 90;
+        let timerInterval = null;
+
+        function setTimerDuration(seconds) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            timerSeconds = seconds;
+            totalTimerSeconds = seconds;
+            updateTimerDisplay();
+            document.getElementById('timer-status-badge').innerText = 'Ready';
+            document.getElementById('timer-toggle-btn').innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5 mr-1.5 fill-current"></i> Start Rest Timer';
+            lucide.createIcons();
+        }
+
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timerSeconds / 60)).padStart(2, '0');
+            const secs = String(timerSeconds % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+            
+            const pct = (timerSeconds / totalTimerSeconds) * 100;
+            document.getElementById('timer-progress').style.width = `${pct}%`;
+        }
+
+        function toggleTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                document.getElementById('timer-status-badge').innerText = 'Paused';
+                document.getElementById('timer-toggle-btn').innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5 mr-1.5 fill-current"></i> Resume';
+            } else {
+                document.getElementById('timer-status-badge').innerText = 'Resting...';
+                document.getElementById('timer-toggle-btn').innerHTML = '<i data-lucide="pause" class="w-3.5 h-3.5 mr-1.5 fill-current"></i> Pause';
+                timerInterval = setInterval(() => {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                    if (timerSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        timerInterval = null;
+                        document.getElementById('timer-status-badge').innerText = 'Complete!';
+                        document.getElementById('timer-toggle-btn').innerHTML = '<i data-lucide="play" class="w-3.5 h-3.5 mr-1.5 fill-current"></i> Restart';
+                    }
+                }, 1000);
+            }
+            lucide.createIcons();
+        }
+
+        function resetTimer() {
+            setTimerDuration(totalTimerSeconds);
+        }
+
+        // Workout Set Completion
+        let totalTonnage = 6840;
+
+        function toggleSetComplete(btn, weight, reps) {
+            if (btn.classList.contains('bg-emerald-700')) {
+                btn.className = "set-complete-btn px-3 py-1.5 bg-forge-sand dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-cream border border-forge-border dark:border-forge-dark-border rounded-lg font-sans text-xs font-semibold hover:border-forge-gold transition";
+                btn.innerText = "Log Set";
+                totalTonnage -= (weight * reps);
+            } else {
+                btn.className = "set-complete-btn px-3 py-1.5 bg-emerald-700 text-white rounded-lg font-sans text-xs font-semibold hover:bg-emerald-800 transition";
+                btn.innerText = "✓ Completed";
+                totalTonnage += (weight * reps);
+                
+                // Automatically trigger rest timer on set logging
+                setTimerDuration(90);
+                toggleTimer();
+            }
+            document.getElementById('logged-tonnage').innerText = `${totalTonnage.toLocaleString()} lbs`;
+        }
+
+        function addSetRow(btn) {
+            const tableBody = btn.closest('.bg-forge-cream, .bg-forge-charcoal-light').querySelector('.set-table-body');
+            const newRow = document.createElement('tr');
+            newRow.className = 'set-row';
+            const setNum = tableBody.children.length + 1;
+            newRow.innerHTML = `
+                <td class="py-3 px-3 font-bold text-forge-500">${setNum}</td>
+                <td class="py-3 px-3">
+                    <select class="bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded px-1.5 py-1 text-[11px]">
+                        <option value="warmup">Warm-up</option>
+                        <option value="working" selected>Working</option>
+                        <option value="drop">Drop Set</option>
+                    </select>
+                </td>
+                <td class="py-3 px-3"><input type="number" value="225" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                <td class="py-3 px-3"><input type="number" value="8" class="w-20 bg-forge-sand/60 dark:bg-forge-charcoal border border-forge-border dark:border-forge-dark-border rounded-lg px-2 py-1.5 font-bold font-mono text-center"></td>
+                <td class="py-3 px-3 text-forge-500">RPE 8.5</td>
+                <td class="py-3 px-3 text-right">
+                    <button onclick="toggleSetComplete(this, 225, 8)" class="set-complete-btn px-3 py-1.5 bg-forge-sand dark:bg-forge-charcoal text-forge-charcoal dark:text-forge-cream border border-forge-border dark:border-forge-dark-border rounded-lg font-sans text-xs font-semibold hover:border-forge-gold transition">
+                        Log Set
+                    </button>
+                </td>
+            `;
+            tableBody.appendChild(newRow);
+        }
+
+        // Nutrition Vision Presets
+        const mealsDatabase = {
+            salmon: { title: "Grilled Salmon & Wild Rice Bowl", emoji: "🥗", desc: "Estimated portion: 180g Atlantic Salmon, 150g Brown Rice, 60g Avocado.", cal: 620, pro: 46, carb: 54, fat: 22 },
+            steak: { title: "Sirloin Steak & Roasted Potatoes", emoji: "🥩", desc: "Estimated portion: 220g Prime Sirloin, 180g Roasted Potatoes, Asparagus.", cal: 740, pro: 58, carb: 42, fat: 28 },
+            oats: { title: "Whey Protein Oatmeal & Berries", emoji: "🥣", desc: "Estimated portion: 80g Oats, 1 Scoop Whey, Blueberries, 15g Almonds.", cal: 460, pro: 38, carb: 52, fat: 12 }
+        };
+        let selectedMealKey = 'salmon';
+
+        function selectSampleMeal(key) {
+            selectedMealKey = key;
+            document.querySelectorAll('.sample-meal-btn').forEach(btn => {
+                btn.className = "sample-meal-btn p-3 rounded-xl border border-forge-border dark:border-forge-dark-border bg-forge-sand/40 dark:bg-forge-charcoal text-left transition font-mono text-xs hover:border-forge-gold";
+            });
+            document.getElementById(`sample-${key}`).className = "sample-meal-btn p-3 rounded-xl border border-forge-gold bg-forge-gold/10 text-left transition font-mono text-xs";
+            
+            const meal = mealsDatabase[key];
+            document.getElementById('meal-emoji-preview').innerText = meal.emoji;
+            document.getElementById('meal-title-preview').innerText = meal.title;
+            document.getElementById('meal-desc-preview').innerText = meal.desc;
+        }
+
+        function triggerVisionScan() {
+            const btn = document.getElementById('scan-vision-btn');
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 mr-2 animate-spin"></i> Analyzing Image...`;
+            lucide.createIcons();
+
+            setTimeout(() => {
+                const meal = mealsDatabase[selectedMealKey];
+                document.getElementById('res-cal').innerText = `${meal.cal} kcal`;
+                document.getElementById('res-pro').innerText = `${meal.pro}g`;
+                document.getElementById('res-carb').innerText = `${meal.carb}g`;
+                document.getElementById('res-fat').innerText = `${meal.fat}g`;
+
+                document.getElementById('ai-nutrition-results').classList.remove('hidden');
+                btn.innerHTML = `<i data-lucide="scan" class="w-4 h-4 mr-2"></i> Run AI Vision Extraction`;
+                lucide.createIcons();
+            }, 800);
+        }
+
+        function commitNutritionLog() {
+            const meal = mealsDatabase[selectedMealKey];
+            
+            // Update Progress Bars
+            document.getElementById('macro-cal-text').innerText = `${1820 + meal.cal} / 2,600 kcal`;
+            document.getElementById('macro-pro-text').innerText = `${154 + meal.pro}g (100%)`;
+            
+            document.getElementById('macro-cal-bar').style.width = '94%';
+            document.getElementById('macro-pro-bar').style.width = '100%';
+
+            // Append Log Stream Entry
+            const stream = document.getElementById('meal-logs-stream');
+            const entry = document.createElement('div');
+            entry.className = "p-2.5 rounded-xl bg-forge-gold/10 border border-forge-gold/30 flex justify-between items-center";
+            entry.innerHTML = `
+                <div>
+                    <strong class="font-serif text-sm block">${meal.title}</strong>
+                    <span class="text-[10px] text-forge-500">${meal.cal} kcal • ${meal.pro}g P • ${meal.carb}g C</span>
+                </div>
+                <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold">Vision Added</span>
+            `;
+            stream.prepend(entry);
+            alert('Meal successfully logged into your daily nutrition journal!');
+        }
+
+        // Telemetry AI Sandbox Execution
+        function runTelemetryProxyTest() {
+            const statusPill = document.getElementById('proxy-status-pill');
+            const logStream = document.getElementById('telemetry-log-stream');
+            const outputCard = document.getElementById('decoded-ai-output');
+            
+            statusPill.innerText = "EXECUTING";
+            statusPill.className = "text-[10px] px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-bold animate-pulse";
+
+            logStream.innerHTML = `<div class="text-forge-400">[0.00ms] POST /api/ai-coaching HTTP/1.1</div>`;
+
+            setTimeout(() => {
+                logStream.innerHTML += `<div class="text-forge-300">[12.4ms] Sanitizing user prompt... (0 injection flags found)</div>`;
+            }, 200);
+
+            setTimeout(() => {
+                logStream.innerHTML += `<div class="text-forge-300">[45.8ms] Supabase RLS Profile Key: AUTHENTICATED (Role: Athlete)</div>`;
+            }, 400);
+
+            setTimeout(() => {
+                logStream.innerHTML += `<div class="text-forge-gold">[120.2ms] Safety Rule Check: Joint Stress Filter Triggered (Anterior Shoulder Flag)</div>`;
+            }, 650);
+
+            setTimeout(() => {
+                logStream.innerHTML += `<div class="text-emerald-400">[210.5ms] 200 OK — Model response payload returned (184 tokens)</div>`;
+                statusPill.innerText = "200 OK";
+                statusPill.className = "text-[10px] px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold";
+
+                document.getElementById('decoded-output-text').innerHTML = `
+                    <strong>Recommendation:</strong> Reduce Barbell Bench Press working sets from 3 to 2. Swap set #3 for a neutral-grip Dumbbell Press to relieve anterior shoulder impingement while maintaining chest volume.
+                `;
+                outputCard.classList.remove('hidden');
+            }, 900);
+        }
+
+        // Auth & Client Modals
+        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+        function openClientDrawer(name, block) {
+            document.getElementById('drawer-client-name').innerText = name;
+            document.getElementById('drawer-client-block').innerText = block;
+            document.getElementById('client-drawer').classList.remove('hidden');
+        }
+        function closeClientDrawer() { document.getElementById('client-drawer').classList.add('hidden'); }
+    </script>
+</body>
+</html>
