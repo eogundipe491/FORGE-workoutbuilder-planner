@@ -53,6 +53,19 @@ The local command uses Netlify Dev so that `/.netlify/functions/*` routes work. 
    - `SUPABASE_ANON_KEY`
 6. Deploy and add the final Netlify domain to Supabase Auth's allowed redirect URLs.
 
+## Verification links that say “This site can’t be reached”
+
+Signup, resend-verification, and password-reset emails request a return to `https://forge-workoutbuilder-planner.netlify.app/`, including when requested from a local server or temporary preview.
+
+In your existing Supabase project, open **Authentication → URL Configuration**:
+
+1. Set **Site URL** to `https://forge-workoutbuilder-planner.netlify.app/`.
+2. Add that same full HTTPS URL to **Redirect URLs** and save. If the requested redirect is not allowed, Supabase can fall back to Site URL, which must not be localhost for production emails.
+3. Under **Authentication → Email Templates → Confirm signup**, use the standard `{{ .ConfirmationURL }}` link. Do not replace it with a hard-coded localhost URL or a plain Site URL; the verification endpoint must validate the email first.
+4. After the site deploys, open the live site, choose **Log in / Sign up**, enter your Gmail address, and choose **Resend verification email**. Open only the newest email. Existing emails retain their old URLs.
+
+If the browser still cannot reach the link, check only the hostname in the address bar: `localhost` indicates an incorrect redirect or email template; an unreachable Supabase hostname indicates the existing Supabase project URL or project availability needs checking. Do not share the full verification link because it contains a sign-in token. These settings belong to the existing Supabase project and are not changed by deploying the frontend.
+
 ## 4. Optional AI provider
 
 Add at least one provider key in Netlify environment variables:
