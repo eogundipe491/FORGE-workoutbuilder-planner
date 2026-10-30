@@ -2,13 +2,19 @@
   "name": "forge-fitness-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "FORGE fitness platform — Netlify and Supabase",
+  "description": "FORGE fitness platform \u2014 Netlify and Supabase",
   "scripts": {
     "dev": "netlify dev",
     "build": "node --check --input-type=module < public/app.js && node --check netlify/functions/ai-coaching.mjs && node --check netlify/functions/config.mjs",
-    "test": "npm run build"
+    "test": "npm run build",
+    "test:onboarding": "node --test tests/onboarding.test.mjs"
   },
   "devDependencies": {
+    "drizzle-kit": "^1.0.0-beta.22",
     "netlify-cli": "^23.0.0"
+  },
+  "dependencies": {
+    "@netlify/database": "^2.0.1",
+    "drizzle-orm": "^1.0.0-beta.22"
   }
 }

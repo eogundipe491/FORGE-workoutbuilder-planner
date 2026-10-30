@@ -5,7 +5,7 @@ const AUTH_EMAIL_REDIRECT = 'https://forge-workoutbuilder-planner.netlify.app/';
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => [...document.querySelectorAll(s)];
-const state = { supabase:null, user:null, profile:null, view:'home', authMode:'login', questions:[], answers:{}, questionIndex:0, exercises:[], selectedExercises:[], workouts:[], programmes:[], sessions:[], meals:[], activeWorkout:null, editingWorkoutId:null, pendingPlan:null, timer:null, timerSeconds:90 };
+const state = { supabase:null, user:null, profile:null, view:'home', authMode:'login', questions:[], answers:{}, questionIndex:0, questionnaireReady:false, questionnaireCompletedAt:null, questionnaireRevision:0, questionnaireDirty:false, questionnaireVersion:0, questionnaireReview:false, questionnaireBusy:false, questionnaireConflict:false, exercises:[], selectedExercises:[], workouts:[], programmes:[], sessions:[], meals:[], activeWorkout:null, editingWorkoutId:null, pendingPlan:null, timer:null, timerSeconds:90 };
 const exerciseSeed = [
  ['Barbell Back Squat','Legs','Barbell','Squat','Compound'],['Goblet Squat','Legs','Dumbbell','Squat','Compound'],['Front Squat','Legs','Barbell','Squat','Compound'],['Leg Press','Legs','Machine','Squat','Compound'],['Romanian Deadlift','Hamstrings','Barbell','Hinge','Compound'],['Conventional Deadlift','Back','Barbell','Hinge','Compound'],['Hip Thrust','Glutes','Barbell','Hinge','Compound'],['Walking Lunge','Legs','Dumbbell','Lunge','Compound'],['Bulgarian Split Squat','Legs','Dumbbell','Lunge','Compound'],['Leg Extension','Quadriceps','Machine','Knee extension','Isolation'],['Seated Leg Curl','Hamstrings','Machine','Knee flexion','Isolation'],['Standing Calf Raise','Calves','Machine','Plantar flexion','Isolation'],
  ['Barbell Bench Press','Chest','Barbell','Horizontal push','Compound'],['Dumbbell Bench Press','Chest','Dumbbell','Horizontal push','Compound'],['Incline Dumbbell Press','Chest','Dumbbell','Incline push','Compound'],['Push-Up','Chest','Bodyweight','Horizontal push','Compound'],['Chest Fly','Chest','Cable','Horizontal adduction','Isolation'],['Overhead Press','Shoulders','Barbell','Vertical push','Compound'],['Dumbbell Shoulder Press','Shoulders','Dumbbell','Vertical push','Compound'],['Lateral Raise','Shoulders','Dumbbell','Shoulder abduction','Isolation'],['Face Pull','Shoulders','Cable','Horizontal pull','Accessory'],['Triceps Pushdown','Triceps','Cable','Elbow extension','Isolation'],['Overhead Triceps Extension','Triceps','Cable','Elbow extension','Isolation'],
@@ -57,14 +57,14 @@ state.questions=questions;
 
 function toast(message){const el=$('#toast');el.textContent=message;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2600)}
 function message(id,text,isError=true){const el=$(id);if(el){el.textContent=text;el.style.color=isError?'var(--rust)':'var(--olive)'}}
-function showView(view){if(!state.user && !['home'].includes(view)){openAuth();return} state.view=view;$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));window.scrollTo({top:0,behavior:'smooth'});if(view==='overview')refreshOverview();if(view==='library')renderExercises();if(view==='programmes')refreshPlans();if(view==='progress')refreshProgress();if(view==='nutrition')refreshNutrition();if(view==='training')renderBuilder();if(view==='trainer')refreshTrainer();if(view==='coach')$('#ai-status').textContent='AI provider status is checked when you submit a request. Your account context is sent only with your authenticated request.'}
+async function showView(view,onboardingSaved=false){if(state.questionnaireBusy&&!onboardingSaved){toast('Please wait for the questionnaire save to finish.');return}if(state.view==='questionnaire'&&view!=='questionnaire'&&state.user){saveAnswerFromUI();if(!await flushQuestionnaire())return}if(!state.user && !['home'].includes(view)){openAuth();return} state.view=view;$$('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${view}`));$$('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));window.scrollTo({top:0,behavior:'smooth'});if(view==='overview')refreshOverview();if(view==='library')renderExercises();if(view==='programmes')refreshPlans();if(view==='progress')refreshProgress();if(view==='nutrition')refreshNutrition();if(view==='training')renderBuilder();if(view==='trainer')refreshTrainer();if(view==='coach')$('#ai-status').textContent='AI provider status is checked when you submit a request. Your account context is sent only with your authenticated request.'}
 function openAuth(mode='login'){state.authMode=mode;renderAuthMode();$('#auth-dialog').showModal()}
 function renderAuthMode(){const signup=state.authMode==='signup',reset=state.authMode==='reset';$('#auth-title').textContent=signup?'Create your free account':reset?'Choose a new password':'Welcome back';$('#auth-subtitle').textContent=signup?'Your training system starts here.':reset?'Set a new password for your FORGE account.':'Log in to access your training workspace.';$('#signup-fields').classList.toggle('hidden',!signup);$('#confirm-field').classList.toggle('hidden',!(signup||reset));$('#auth-submit').textContent=signup?'Create account':reset?'Update password':'Log in';$('#auth-toggle').classList.toggle('hidden',reset);$('#resend-verification').classList.toggle('hidden',reset);$('#auth-toggle').textContent=signup?'Already have an account? Log in':'Create an account';$('#forgot-password').classList.toggle('hidden',signup||reset);$('#auth-password').autocomplete=(signup||reset)?'new-password':'current-password';message('#auth-message','')}
 function requireBackend(){if(!state.supabase){toast('The site owner must finish Supabase configuration before accounts can be created.');return false}return true}
 async function init(){ $('#year').textContent=new Date().getFullYear();$('#main-nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)showView(b.dataset.view)});$$('[data-view]').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));$('#auth-open').onclick=()=>openAuth();$('#hero-signup').onclick=()=>openAuth('signup');$('#hero-explore').onclick=()=>document.querySelector('.feature-grid').scrollIntoView({behavior:'smooth'});$('#logout').onclick=logout;$('#auth-close').onclick=()=>$('#auth-dialog').close();$('#auth-toggle').onclick=()=>{state.authMode=state.authMode==='login'?'signup':'login';renderAuthMode()};$('#auth-form').addEventListener('submit',authSubmit);$('#forgot-password').onclick=forgotPassword;$('#resend-verification').onclick=resendVerification;$('#mobile-menu').onclick=()=>$('#main-nav').classList.toggle('open');$('#footer-coach').onclick=()=>showView('coach');
-  $('#quiz-back').onclick=()=>moveQuestion(-1);$('#quiz-next').onclick=()=>moveQuestion(1);$('#quiz-skip').onclick=skipQuestionnaire;$('#quiz-question').addEventListener('change',e=>saveAnswerFromUI(e));$('#library-search').oninput=renderExercises;$('#library-equipment').onchange=renderExercises;$('#library-muscle').onchange=renderExercises;$('#builder-search').oninput=renderBuilder;$('#save-workout').onclick=saveWorkout;$('#custom-exercise-open').onclick=()=>$('#exercise-dialog').showModal();$('#exercise-close').onclick=()=>$('#exercise-dialog').close();$('#custom-exercise-form').onsubmit=saveCustomExercise;$('#create-programme').onclick=createProgramme;$('#export-data').onclick=exportData;$('#nutrition-enabled').onchange=toggleNutrition;$('#save-meal').onclick=saveMeal;$('#ask-coach').onclick=askCoach;$('#session-close').onclick=()=>$('#session-dialog').close();$('#session-form').onsubmit=finishSession;$('#timer-start').onclick=startTimer;$('#timer-reset').onclick=()=>{clearInterval(state.timer);state.timerSeconds=90;renderTimer()};
+  $('#quiz-back').onclick=()=>moveQuestion(-1);$('#quiz-next').onclick=()=>moveQuestion(1);$('#quiz-skip').onclick=skipQuestionnaire;$('#quiz-skip-top').onclick=skipQuestionnaire;$('#restart-questionnaire').onclick=()=>$('#restart-dialog').showModal();$('#restart-cancel').onclick=()=>$('#restart-dialog').close();$('#restart-confirm').onclick=restartQuestionnaire;$('#quiz-question').addEventListener('input',saveAnswerFromUI);$('#quiz-question').addEventListener('change',saveAnswerFromUI);window.addEventListener('beforeunload',e=>{if(state.questionnaireDirty){cacheQuestionnaire();void flushQuestionnaire();e.preventDefault();e.returnValue=''}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&state.questionnaireDirty){cacheQuestionnaire();void flushQuestionnaire()}});$('#library-search').oninput=renderExercises;$('#library-equipment').onchange=renderExercises;$('#library-muscle').onchange=renderExercises;$('#builder-search').oninput=renderBuilder;$('#save-workout').onclick=saveWorkout;$('#custom-exercise-open').onclick=()=>$('#exercise-dialog').showModal();$('#exercise-close').onclick=()=>$('#exercise-dialog').close();$('#custom-exercise-form').onsubmit=saveCustomExercise;$('#create-programme').onclick=createProgramme;$('#export-data').onclick=exportData;$('#nutrition-enabled').onchange=toggleNutrition;$('#save-meal').onclick=saveMeal;$('#ask-coach').onclick=askCoach;$('#session-close').onclick=()=>$('#session-dialog').close();$('#session-form').onsubmit=finishSession;$('#timer-start').onclick=startTimer;$('#timer-reset').onclick=()=>{clearInterval(state.timer);state.timerSeconds=90;renderTimer()};
   try{const r=await fetch('/.netlify/functions/config');if(r.ok){const c=await r.json();if(c.supabaseUrl&&c.supabaseAnonKey){state.supabase=createClient(c.supabaseUrl,c.supabaseAnonKey);const {data:{session}}=await state.supabase.auth.getSession();if(session)await setUser(session.user);state.supabase.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY')queueMicrotask(()=>openAuth('reset'));if(session){if(state.user?.id!==session.user.id)queueMicrotask(()=>setUser(session.user))}else if(state.user)queueMicrotask(clearUser)})}}}catch(e){console.warn('Backend configuration not available',e)}
-  populateFilters();renderQuiz();renderTemplates();if(!state.supabase)$('#trainer-status').textContent='Supabase is not configured. Follow SETUP.md to enable real accounts and data persistence.';showView('home');
+  populateFilters();renderQuiz();renderTemplates();if(!state.supabase)$('#trainer-status').textContent='Supabase is not configured. Follow SETUP.md to enable real accounts and data persistence.';if(!state.user)showView('home');
 }
 async function authSubmit(e){e.preventDefault();if(!requireBackend())return;const email=$('#auth-email').value.trim(),password=$('#auth-password').value;$('#auth-submit').disabled=true;message('#auth-message','Working…',false);try{let result;if(state.authMode==='reset'){if(password!==$('#auth-confirm').value)throw new Error('Your passwords do not match.');const {error}=await state.supabase.auth.updateUser({password});if(error)throw error;$('#auth-dialog').close();toast('Password updated successfully.');return}else if(state.authMode==='signup'){const first=$('#first-name').value.trim(),last=$('#last-name').value.trim();if(!first||!last)throw new Error('Enter your first name and surname.');if(password!==$('#auth-confirm').value)throw new Error('Your passwords do not match.');result=await state.supabase.auth.signUp({email,password,options:{data:{first_name:first,last_name:last},emailRedirectTo:AUTH_EMAIL_REDIRECT}});if(result.error)throw result.error;if(result.data.session){await setUser(result.data.user);$('#auth-dialog').close()}else message('#auth-message','Check your email to verify your address before logging in. If the link fails, request a new verification email below.',false)}else{result=await state.supabase.auth.signInWithPassword({email,password});if(result.error)throw result.error;await setUser(result.data.user);$('#auth-dialog').close()} }catch(err){message('#auth-message',err.message||'Authentication failed.')}finally{$('#auth-submit').disabled=false}}
 async function resendVerification(){
@@ -87,16 +87,53 @@ async function resendVerification(){
   }finally{button.disabled=false;}
 }
 async function forgotPassword(){if(!requireBackend())return;const email=$('#auth-email').value.trim();if(!email){message('#auth-message','Enter your email address first.');return}const {error}=await state.supabase.auth.resetPasswordForEmail(email,{redirectTo:AUTH_EMAIL_REDIRECT});message('#auth-message',error?.message||'If the account exists, a password reset email has been sent.',!error)}
-async function setUser(user){state.user=user;$('#account-label').textContent=user.email||'Signed in';$('#auth-open').classList.add('hidden');$('#logout').classList.remove('hidden');await ensureProfile();await Promise.all([loadExercises(),loadWorkouts(),loadProgrammes(),loadSessions(),loadMeals(),loadQuestionnaire()]);const hasAnswers=Object.keys(state.answers).some(k=>!String(k).endsWith('_explanation'));showView((hasAnswers||state.profile?.onboarding_skipped)?'overview':'questionnaire')}
-function clearUser(){state.user=null;state.profile=null;state.answers={};state.questionIndex=0;state.workouts=[];state.programmes=[];state.sessions=[];$('#account-label').textContent='Not signed in';$('#auth-open').classList.remove('hidden');$('#logout').classList.add('hidden');showView('home')}
-async function logout(){if(state.supabase)await state.supabase.auth.signOut();clearUser()}
+let restoringUser;
+function setUser(user){if(restoringUser?.id===user.id)return restoringUser.promise;const promise=restoreUser(user);restoringUser={id:user.id,promise};return promise.finally(()=>{if(restoringUser?.promise===promise)restoringUser=null})}
+async function restoreUser(user){state.user=user;$('#account-label').textContent=user.email||'Signed in';$('#auth-open').classList.add('hidden');$('#logout').classList.remove('hidden');await ensureProfile();await Promise.all([loadExercises(),loadWorkouts(),loadProgrammes(),loadSessions(),loadMeals(),loadQuestionnaire()]);$('#restart-questionnaire').classList.remove('hidden');await showView((state.questionnaireCompletedAt||state.profile?.onboarding_skipped)?'overview':'questionnaire')}
+function clearUser(){clearTimeout(saveQuestionTimer);cacheQuestionnaire();state.questionnaireReady=false;state.questionnaireDirty=false;state.questionnaireCompletedAt=null;state.questionnaireReview=false;state.questionnaireConflict=false;$('#restart-questionnaire').classList.add('hidden');state.user=null;state.profile=null;state.answers={};state.questionIndex=0;state.workouts=[];state.programmes=[];state.sessions=[];$('#account-label').textContent='Not signed in';$('#auth-open').classList.remove('hidden');$('#logout').classList.add('hidden');showView('home')}
+async function logout(){if(state.questionnaireBusy){toast('Please wait for the questionnaire save to finish.');return}if(state.view==='questionnaire')saveAnswerFromUI();if(!await flushQuestionnaire())return;if(state.supabase){const {error}=await state.supabase.auth.signOut();if(error){toast('Could not log out. Please retry.');return}}clearUser()}
 async function ensureProfile(){const {data,error}=await state.supabase.from('profiles').select('*').eq('id',state.user.id).maybeSingle();if(error)console.error(error);if(data)state.profile=data;else{const meta=state.user.user_metadata||{};const {data:created,error:e}=await state.supabase.from('profiles').insert({id:state.user.id,first_name:meta.first_name||'',last_name:meta.last_name||'',role:'athlete'}).select().single();if(e)console.error(e);state.profile=created}}
 async function loadExercises(){const {data,error}=await state.supabase.from('exercises').select('*').order('name').limit(1000);if(error){console.warn('Exercise table unavailable; showing bundled catalogue',error.message);state.exercises=exerciseSeed}else{state.exercises=[...exerciseSeed.filter(s=>!data.some(d=>d.name.toLowerCase()===s.name.toLowerCase())),...(data||[])].sort((a,b)=>a.name.localeCompare(b.name))}renderExercises();renderBuilder()}
 async function loadWorkouts(){const {data,error}=await state.supabase.from('workouts').select('*').order('updated_at',{ascending:false});if(error){console.error(error);state.workouts=[]}else state.workouts=data||[]}
 async function loadProgrammes(){const {data,error}=await state.supabase.from('programmes').select('*').order('created_at',{ascending:false});if(error){console.error(error);state.programmes=[]}else state.programmes=data||[]}
 async function loadSessions(){const {data,error}=await state.supabase.from('workout_sessions').select('*').order('started_at',{ascending:false}).limit(100);if(error){console.error(error);state.sessions=[]}else state.sessions=data||[]}
 async function loadMeals(){const {data,error}=await state.supabase.from('meals').select('*').order('logged_at',{ascending:false}).limit(50);if(error){console.warn(error);state.meals=[]}else state.meals=data||[]}
-async function loadQuestionnaire(){const {data,error}=await state.supabase.from('onboarding_responses').select('answers').eq('user_id',state.user.id).maybeSingle();if(data?.answers){state.answers=data.answers;renderQuiz()}if(error)console.warn(error)}
+async function questionnaireRequest(method='GET',payload){
+  const {data:{session}}=await state.supabase.auth.getSession();
+  if(!session)throw new Error('Please sign in again. Your unsaved answers are kept in this browser.');
+  const response=await fetch('/.netlify/functions/onboarding',{method,headers:{Authorization:`Bearer ${session.access_token}`,'Content-Type':'application/json'},...(payload?{body:JSON.stringify(payload),keepalive:true}:{})});
+  const data=await response.json();
+  if(!response.ok){const error=new Error(data.error||'Questionnaire save failed. Please retry.');error.status=response.status;throw error}
+  return data;
+}
+async function loadQuestionnaire(){
+  state.questionnaireReady=false;
+  state.questionnaireDirty=false;
+  state.questionnaireConflict=false;
+  state.questionnaireReview=false;
+  state.answers={};
+  state.questionIndex=0;
+  try{
+    const record=await questionnaireRequest();
+    state.answers=record.answers||{};
+    state.questionIndex=record.questionIndex;
+    state.questionnaireCompletedAt=record.completedAt;
+    state.questionnaireRevision=record.revision;
+    if(state.profile)state.profile.onboarding_skipped=record.skipped;
+    state.questionnaireReady=true;
+    let draft;
+    try{draft=JSON.parse(localStorage.getItem(questionnaireDraftKey())||'null')}catch{}
+    if(draft&&draft.revision===record.revision&&draft.answers&&Number.isInteger(draft.questionIndex)){
+      state.answers=draft.answers;
+      state.questionIndex=Math.max(0,Math.min(36,draft.questionIndex));
+      state.questionnaireDirty=true;
+      state.questionnaireVersion++;
+      questionnaireStatus('Recovered unsaved answers from this browser. Saving…',false);
+      persistQuestionnaireDebounced();
+    }else questionnaireStatus(draft?'An older browser draft is preserved; the latest saved questionnaire is loaded.':'',Boolean(draft));
+  }catch(error){questionnaireStatus('Could not load your questionnaire. Refresh to retry. Your saved responses have not been changed.');toast('Could not load your questionnaire. Refresh to retry.')}
+  renderQuiz();
+}
 function populateFilters(){const eq=[...new Set(exerciseSeed.map(x=>x.equipment))].sort(),mu=[...new Set(exerciseSeed.map(x=>x.muscle_group))].sort();$('#library-equipment').innerHTML='<option value="">All equipment</option>'+eq.map(x=>`<option>${escapeHtml(x)}</option>`).join('');$('#library-muscle').innerHTML='<option value="">All muscle groups</option>'+mu.map(x=>`<option>${escapeHtml(x)}</option>`).join('')}
 function escapeHtml(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function renderExercises(){const q=($('#library-search')?.value||'').toLowerCase(),eq=$('#library-equipment')?.value||'',mu=$('#library-muscle')?.value||'';const list=state.exercises.filter(x=>(`${x.name} ${x.description||''} ${x.movement_pattern||''}`.toLowerCase().includes(q))&&(!eq||x.equipment===eq)&&(!mu||x.muscle_group===mu));$('#exercise-results').innerHTML=list.length?list.map(x=>`<article class="exercise-card"><div class="eyebrow">${escapeHtml(x.category||'EXERCISE')}</div><h3>${escapeHtml(x.name)}</h3><p>${escapeHtml(x.muscle_group||'')}</p><p>${escapeHtml(x.equipment||'Equipment varies')} · ${escapeHtml(x.movement_pattern||'')}</p><button class="mini-button" data-add-exercise="${escapeHtml(x.id)}">Add to workout +</button></article>`).join(''):'<div class="empty-state">No exercises match those filters.</div>';$$('[data-add-exercise]').forEach(b=>b.onclick=()=>addExerciseToBuilder(b.dataset.addExercise))}
@@ -105,13 +142,109 @@ function addExerciseToBuilder(id){const x=state.exercises.find(e=>String(e.id)==
 async function saveWorkout(){if(!state.user)return openAuth();const name=$('#workout-name').value.trim();if(!name){message('#save-workout-message','Give your workout a name.');return}if(!state.selectedExercises.length){message('#save-workout-message','Add at least one exercise.');return}const payload={user_id:state.user.id,name,notes:$('#workout-notes').value.trim(),exercises:state.selectedExercises.map((x,i)=>({exercise_id:x.id,name:x.name,muscle_group:x.muscle_group,equipment:x.equipment,sort_order:i,sets:Number(x.sets)||3,reps:String(x.reps||'8–12'),rest_seconds:Number(x.rest_seconds)||90})),updated_at:new Date().toISOString()};let query;if(state.editingWorkoutId)query=state.supabase.from('workouts').update(payload).eq('id',state.editingWorkoutId).select().single();else query=state.supabase.from('workouts').insert(payload).select().single();const {data,error}=await query;if(error){message('#save-workout-message',error.message);return}if(state.editingWorkoutId){state.workouts=state.workouts.map(w=>w.id===data.id?data:w)}else state.workouts.unshift(data);state.editingWorkoutId=null;state.selectedExercises=[];$('#workout-name').value='';$('#workout-notes').value='';$('#save-workout').textContent='Save workout';renderBuilder();message('#save-workout-message','Workout saved to your account.',false);toast('Workout saved')}
 async function saveCustomExercise(e){e.preventDefault();if(!state.user)return openAuth();const payload={user_id:state.user.id,name:$('#custom-name').value.trim(),muscle_group:$('#custom-muscle').value,equipment:$('#custom-equipment').value.trim()||'Not specified',description:$('#custom-description').value.trim(),category:'Custom',movement_pattern:'Custom'};const {error}=await state.supabase.from('exercises').insert(payload);if(error){message('#custom-message',error.message);return}$('#exercise-dialog').close();$('#custom-exercise-form').reset();await loadExercises();toast('Custom exercise saved')}
 function renderTemplates(){const templates=[['Full body foundation','A balanced starting structure using basic movement patterns.',['Goblet Squat','Push-Up','Seated Cable Row','Glute Bridge']],['Upper body basics','A simple upper-body session with push and pull movements.',['Dumbbell Bench Press','Lat Pulldown','Lateral Raise','Biceps Curl']],['Lower body basics','A lower-body session covering squat, hinge and accessory patterns.',['Goblet Squat','Romanian Deadlift','Reverse Lunge','Standing Calf Raise']]];$('#template-grid').innerHTML=templates.map((t,i)=>`<article class="template"><div class="eyebrow">STARTER ${String(i+1).padStart(2,'0')}</div><h3>${t[0]}</h3><p>${t[1]}</p><button class="mini-button" data-template="${i}">Use template →</button></article>`).join('');$$('[data-template]').forEach(b=>b.onclick=()=>{const t=templates[Number(b.dataset.template)];state.selectedExercises=t[2].map(n=>state.exercises.find(x=>x.name===n)||exerciseSeed.find(x=>x.name===n)).filter(Boolean);$('#workout-name').value=t[0];renderBuilder();showView('training')})}
-function renderQuiz(){const q=state.questions[state.questionIndex];if(!q)return;$('#quiz-section').textContent=q.section;$('#quiz-count').textContent=`Question ${state.questionIndex+1} of ${state.questions.length}`;$('#quiz-progress').style.width=`${((state.questionIndex+1)/state.questions.length)*100}%`;const val=state.answers[q.id];$('#quiz-question').innerHTML=`<h2 class="quiz-title">${q.prompt}</h2><p class="quiz-hint">${q.multiple?'Select all that apply.':'Choose the answer that fits best.'} You can add an explanation if your preference is not listed.</p><div class="option-grid">${q.options.map(o=>`<label class="option ${(Array.isArray(val)?val.includes(o):val===o)?'selected':''}"><input type="${q.multiple?'checkbox':'radio'}" name="q-${q.id}" value="${escapeHtml(o)}" ${(Array.isArray(val)?val.includes(o):val===o)?'checked':''}>${escapeHtml(o)}</label>`).join('')}</div><label class="field-label" for="explain-${q.id}">Something else / explain your preference (optional)</label><textarea id="explain-${q.id}" class="field" rows="3" placeholder="Tell FORGE anything the options do not capture…">${escapeHtml(state.answers[`${q.id}_explanation`]||'')}</textarea>`;$('#quiz-back').disabled=state.questionIndex===0;$('#quiz-next').textContent=state.questionIndex===state.questions.length-1?'Review answers →':'Next →';}
-function saveAnswerFromUI(){const q=state.questions[state.questionIndex];const inputs=$$(`#quiz-question input[name="q-${q.id}"]`);const vals=inputs.filter(i=>i.checked).map(i=>i.value);state.answers[q.id]=q.multiple?vals:(vals[0]||'');state.answers[`${q.id}_explanation`]=$(`#explain-${q.id}`)?.value||'';persistQuestionnaireDebounced()}
-let saveQuestionTimer;function persistQuestionnaireDebounced(){if(!state.user)return;clearTimeout(saveQuestionTimer);saveQuestionTimer=setTimeout(async()=>{const {error}=await state.supabase.from('onboarding_responses').upsert({user_id:state.user.id,answers:state.answers,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error)console.warn('Questionnaire save failed',error)},500)}
-async function moveQuestion(delta){saveAnswerFromUI();if(delta>0&&state.questionIndex===state.questions.length-1){const {error}=await state.supabase.from('onboarding_responses').upsert({user_id:state.user.id,answers:state.answers,completed_at:new Date().toISOString(),updated_at:new Date().toISOString()},{onConflict:'user_id'});if(error){toast('Could not save questionnaire: '+error.message);return}await state.supabase.from('profiles').update({onboarding_skipped:false}).eq('id',state.user.id);state.profile.onboarding_skipped=false;renderReview();return}state.questionIndex=Math.max(0,Math.min(state.questions.length-1,state.questionIndex+delta));renderQuiz()}
-
-async function skipQuestionnaire(){if(state.user&&state.supabase){const {error}=await state.supabase.from('profiles').update({onboarding_skipped:true}).eq('id',state.user.id);if(error){toast(error.message);return}state.profile.onboarding_skipped=true}showView('training')}
-function renderReview(){const box=$('#quiz-question');box.innerHTML=`<div class="eyebrow">REVIEW YOUR ANSWERS</div><h2 class="quiz-title">Your training profile</h2><p class="quiz-hint">Review the information before using it to personalise a plan. You can return and edit any answer.</p>${state.questions.map(q=>`<div class="list-row"><div><strong>${escapeHtml(q.prompt)}</strong><small>${escapeHtml(Array.isArray(state.answers[q.id])?state.answers[q.id].join(', '):(state.answers[q.id]||'Not answered'))}${state.answers[`${q.id}_explanation`]?` · ${escapeHtml(state.answers[`${q.id}_explanation`])}`:''}</small></div><button class="mini-button" data-edit-q="${q.id}">Edit</button></div>`).join('')}<div class="inline-actions"><button class="button button-outline" id="review-back">Back to questionnaire</button><button class="button button-dark" id="generate-plan">Generate AI plan</button><button class="button button-quiet" id="manual-plan">Build manually</button></div><div id="plan-result" class="ai-response hidden"></div>`;$$('[data-edit-q]').forEach(b=>b.onclick=()=>{state.questionIndex=Number(b.dataset.editQ)-1;renderQuiz()});$('#review-back').onclick=()=>{state.questionIndex=0;renderQuiz()};$('#manual-plan').onclick=()=>showView('training');$('#generate-plan').onclick=generatePlan}
+function renderQuiz(){state.questionnaireReview=false;$('.quiz-controls').classList.remove('hidden');const q=state.questions[state.questionIndex];if(!q)return;$('#quiz-section').textContent=q.section;$('#quiz-count').textContent=`Question ${state.questionIndex+1} of ${state.questions.length}`;$('#quiz-progress').style.width=`${((state.questionIndex+1)/state.questions.length)*100}%`;const val=state.answers[q.id];$('#quiz-question').innerHTML=`<h2 class="quiz-title">${q.prompt}</h2><p class="quiz-hint">${q.multiple?'Select all that apply.':'Choose the answer that fits best.'} You can add an explanation if your preference is not listed.</p><div class="option-grid">${q.options.map(o=>`<label class="option ${(Array.isArray(val)?val.includes(o):val===o)?'selected':''}"><input type="${q.multiple?'checkbox':'radio'}" name="q-${q.id}" value="${escapeHtml(o)}" ${(Array.isArray(val)?val.includes(o):val===o)?'checked':''}>${escapeHtml(o)}</label>`).join('')}</div><label class="field-label" for="explain-${q.id}">Something else / explain your preference (optional)</label><textarea id="explain-${q.id}" class="field" rows="3" placeholder="Tell FORGE anything the options do not capture…">${escapeHtml(state.answers[`${q.id}_explanation`]||'')}</textarea>`;$('#quiz-back').disabled=state.questionIndex===0;$('#quiz-next').textContent=state.questionIndex===state.questions.length-1?'Review answers →':'Next →';lockQuestionnaire(!state.questionnaireReady||state.questionnaireBusy);}
+function questionnaireStatus(text,isError=true){message('#quiz-save-status',text,isError)}
+function questionnaireDraftKey(){return `forge-questionnaire-draft:${state.user?.id}`}
+function cacheQuestionnaire(){
+  if(!state.user||!state.questionnaireDirty)return;
+  try{localStorage.setItem(questionnaireDraftKey(),JSON.stringify({answers:state.answers,questionIndex:state.questionIndex,revision:state.questionnaireRevision}))}
+  catch{questionnaireStatus('Answers are not saved yet, and browser backup is unavailable. Keep this page open and retry saving.')}
+}
+function lockQuestionnaire(disabled){
+  $$('#quiz-question input, #quiz-question textarea, .quiz-controls button, #quiz-skip-top').forEach(el=>el.disabled=disabled);
+  if(!disabled)$('#quiz-back').disabled=state.questionIndex===0;
+}
+function saveAnswerFromUI(){
+  if(state.questionnaireReview||!state.questionnaireReady||state.questionnaireBusy||state.view!=='questionnaire')return;
+  const q=state.questions[state.questionIndex];
+  const inputs=$$(`#quiz-question input[name="q-${q.id}"]`);
+  const explanation=$(`#explain-${q.id}`);
+  if(!inputs.length||!explanation)return;
+  const vals=inputs.filter(i=>i.checked).map(i=>i.value);
+  const value=q.multiple?vals:(vals[0]||'');
+  if(JSON.stringify(state.answers[q.id])===JSON.stringify(value)&&(state.answers[`${q.id}_explanation`]||'')===explanation.value)return;
+  state.answers[q.id]=value;
+  state.answers[`${q.id}_explanation`]=explanation.value;
+  inputs.forEach(input=>input.closest('label').classList.toggle('selected',input.checked));
+  state.questionnaireDirty=true;
+  state.questionnaireVersion++;
+  cacheQuestionnaire();
+  persistQuestionnaireDebounced();
+}
+let saveQuestionTimer,questionnaireSaveQueue=Promise.resolve(true);
+function persistQuestionnaireDebounced(){
+  if(!state.user)return;
+  clearTimeout(saveQuestionTimer);
+  questionnaireStatus('Unsaved changes…',false);
+  saveQuestionTimer=setTimeout(()=>void flushQuestionnaire(),500);
+}
+function flushQuestionnaire(action='save'){
+  clearTimeout(saveQuestionTimer);
+  if(!state.user)return Promise.resolve(!state.questionnaireDirty);
+  const userId=state.user.id;
+  const answers=structuredClone(state.answers),questionIndex=state.questionIndex,version=state.questionnaireVersion;
+  const task=async()=>{
+    if(state.user?.id!==userId)return false;
+    if(action==='save'&&!state.questionnaireDirty)return true;
+    if(!state.questionnaireReady||state.questionnaireConflict)return false;
+    try{
+      const record=await questionnaireRequest('PUT',{action,answers,questionIndex,revision:state.questionnaireRevision});
+      if(state.user?.id!==userId)return false;
+      state.questionnaireRevision=record.revision;
+      state.questionnaireCompletedAt=record.completedAt;
+      if(state.profile)state.profile.onboarding_skipped=record.skipped;
+      if(state.questionnaireVersion===version){
+        state.questionnaireDirty=false;
+        try{localStorage.removeItem(questionnaireDraftKey())}catch{}
+        questionnaireStatus('All answers saved.',false);
+      }else cacheQuestionnaire();
+      return true;
+    }catch(error){
+      state.questionnaireConflict=error.status===409;
+      cacheQuestionnaire();
+      questionnaireStatus(error.message||'Could not save answers. Keep this page open and retry.');
+      return false;
+    }
+  };
+  const result=questionnaireSaveQueue.then(task,task);
+  questionnaireSaveQueue=result;
+  return result;
+}
+async function moveQuestion(delta){
+  if(state.questionnaireReview||state.questionnaireBusy||!state.questionnaireReady)return;
+  saveAnswerFromUI();
+  state.questionnaireBusy=true;lockQuestionnaire(true);
+  try{
+    const completing=delta>0&&state.questionIndex===state.questions.length-1;
+    if(completing){if(await flushQuestionnaire('complete'))renderReview();return}
+    if(!await flushQuestionnaire())return;
+    state.questionIndex=Math.max(0,Math.min(state.questions.length-1,state.questionIndex+delta));
+    state.questionnaireDirty=true;state.questionnaireVersion++;cacheQuestionnaire();
+    renderQuiz();
+    await flushQuestionnaire();
+  }finally{state.questionnaireBusy=false;lockQuestionnaire(!state.questionnaireReady)}
+}
+async function skipQuestionnaire(){
+  if(state.questionnaireBusy||!state.questionnaireReady)return;
+  saveAnswerFromUI();state.questionnaireBusy=true;lockQuestionnaire(true);
+  try{if(await flushQuestionnaire('skip'))await showView('training',true)}
+  finally{state.questionnaireBusy=false;lockQuestionnaire(!state.questionnaireReady)}
+}
+async function restartQuestionnaire(){
+  if(state.questionnaireBusy||!state.questionnaireReady)return;
+  const button=$('#restart-confirm');
+  button.disabled=true;state.questionnaireBusy=true;
+  message('#restart-message','');
+  try{
+    // Drain in-flight saves before resetting. Stale tabs are rejected by revision checks.
+    if(!await flushQuestionnaire('restart')){message('#restart-message','Could not restart. Your existing responses are preserved. Reload and retry.');return}
+    state.answers={};state.questionIndex=0;state.questionnaireCompletedAt=null;
+    state.questionnaireDirty=false;state.questionnaireReview=false;state.pendingPlan=null;
+    $('#restart-dialog').close();
+    state.questionnaireBusy=false;renderQuiz();await showView('questionnaire');
+  }finally{button.disabled=false;state.questionnaireBusy=false;}
+}
+function renderReview(){state.questionnaireReview=true;$('.quiz-controls').classList.add('hidden');const box=$('#quiz-question');box.innerHTML=`<div class="eyebrow">REVIEW YOUR ANSWERS</div><h2 class="quiz-title">Your training profile</h2><p class="quiz-hint">Review the information before using it to personalise a plan. You can return and edit any answer.</p>${state.questions.map(q=>`<div class="list-row"><div><strong>${escapeHtml(q.prompt)}</strong><small>${escapeHtml(Array.isArray(state.answers[q.id])?state.answers[q.id].join(', '):(state.answers[q.id]||'Not answered'))}${state.answers[`${q.id}_explanation`]?` · ${escapeHtml(state.answers[`${q.id}_explanation`])}`:''}</small></div><button class="mini-button" data-edit-q="${q.id}">Edit</button></div>`).join('')}<div class="inline-actions"><button class="button button-outline" id="review-back">Back to questionnaire</button><button class="button button-dark" id="generate-plan">Generate AI plan</button><button class="button button-quiet" id="manual-plan">Build manually</button></div><div id="plan-result" class="ai-response hidden"></div>`;$$('[data-edit-q]').forEach(b=>b.onclick=()=>{state.questionIndex=Number(b.dataset.editQ)-1;renderQuiz()});$('#review-back').onclick=()=>{state.questionIndex=0;renderQuiz()};$('#manual-plan').onclick=()=>showView('training');$('#generate-plan').onclick=generatePlan}
 async function generatePlan(){const result=$('#plan-result');result.classList.remove('hidden');result.textContent='Generating a plan from your saved answers…';try{const {data:{session}}=await state.supabase.auth.getSession();const r=await fetch('/.netlify/functions/ai-coaching',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({task:'generate_workout',questionnaire:state.answers,exerciseCatalogue:state.exercises.slice(0,250).map(x=>({id:x.id,name:x.name,muscle_group:x.muscle_group,equipment:x.equipment}))})});const j=await r.json();if(!r.ok)throw new Error(j.error||'AI service unavailable');const plan=j.result;if(!plan||typeof plan!=='object'||!Array.isArray(plan.workouts))throw new Error('The AI response did not contain a usable programme.');state.pendingPlan=plan;result.innerHTML=`<div class="eyebrow">AI DRAFT · REVIEW BEFORE SAVING</div><h3>${escapeHtml(plan.name||'Your proposed programme')}</h3><p>${escapeHtml(plan.description||'Generated from your FORGE questionnaire')}</p><p class="muted">${escapeHtml(String(plan.weeks||'—'))} week structure · ${plan.workouts.length} workouts</p>${plan.workouts.map((w,i)=>`<div class="list-row"><div><strong>${i+1}. ${escapeHtml(w.name||'Workout')}</strong><small>${escapeHtml(w.day||'Flexible day')} · ${(w.exercises||[]).length} exercises</small><small>${(w.exercises||[]).map(x=>escapeHtml(x.name)).join(' · ')}</small></div></div>`).join('')}<div class="inline-actions"><button id="save-generated-plan" class="button button-dark">Approve and save to My Plan</button><button id="discard-generated-plan" class="button button-outline">Discard draft</button></div>`;$('#save-generated-plan').onclick=saveGeneratedPlan;$('#discard-generated-plan').onclick=()=>{state.pendingPlan=null;result.classList.add('hidden')};}catch(e){result.textContent=`AI generation is not available yet: ${e.message}\n\nYou can still build and save workouts manually. The site owner must configure an AI provider in Netlify environment variables.`}}
 
 async function saveGeneratedPlan(){if(!state.pendingPlan||!state.user)return;const plan=state.pendingPlan;const {data,error}=await state.supabase.from('programmes').insert({user_id:state.user.id,name:plan.name||'AI training plan',description:plan.description||'Generated from your FORGE questionnaire',plan_data:plan}).select().single();if(error){toast(error.message);return}state.programmes.unshift(data);state.pendingPlan=null;toast('Approved programme saved to My Plan');showView('programmes')}
